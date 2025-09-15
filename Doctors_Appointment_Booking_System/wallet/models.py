@@ -8,7 +8,11 @@ from django.db.models import F
 
 class Wallet(models.Model):
     code = models.CharField(max_length=32, unique=True)
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="wallet", )
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.CASCADE, 
+        related_name="wallet", 
+        )
     balance = models.DecimalField(
         max_digits=14,
         decimal_places=2,
@@ -34,9 +38,15 @@ class Wallet(models.Model):
         """Add funds (amount > 0) and create a DEPOSIT transaction atomically."""
         amount = self._validate_amount(amount)
         with db_transaction.atomic():
-            Wallet.objects.filter(pk=self.pk).update(balance=F("balance") + amount)
+            Wallet.objects.filter(pk=self.pk).update(
+                balance=F("balance") + amount
+            )
             self.refresh_from_db(fields=["balance"])
-            Transaction.objects.create(wallet=self, payment_type="DEPOSIT", amount=amount)
+            Transaction.objects.create(
+                wallet=self, 
+                payment_type="DEPOSIT", 
+                amount=amount
+            )
         return self.balance
 
     def deduct(self, amount: Decimal, cart=None):
@@ -48,7 +58,12 @@ class Wallet(models.Model):
                 raise ValueError("insufficient funds in wallet")
             w.balance = w.balance - amount
             w.save(update_fields=["balance"])
-            Transaction.objects.create(wallet=w, payment_type="PAYMENT", amount=amount, cart=cart)
+            Transaction.objects.create(
+                wallet=w, 
+                payment_type="PAYMENT", 
+                amount=amount, 
+                cart=cart
+            )
             self.refresh_from_db(fields=["balance"])
         return self.balance
 
@@ -60,9 +75,16 @@ class Cart(models.Model):
         ('FAILED', 'Failed'),
         ('CANCELED', 'Canceled'),
     ]
-    pay_price = models.DecimalField(max_digits=14, decimal_places=2, validators=[MinValueValidator(Decimal("0.00"))])
-    payment_status = models.CharField(max_length=16, choices=PAYMENT_STATUS_CHOICES,
-                                      default=PAYMENT_STATUS_CHOICES[0][0])
+    pay_price = models.DecimalField(
+        max_digits=14, 
+        decimal_places=2, 
+        validators=[MinValueValidator(Decimal("0.00"))]
+    )
+    payment_status = models.CharField(
+        max_length=16, 
+        choices=PAYMENT_STATUS_CHOICES,
+        default=PAYMENT_STATUS_CHOICES[0][0]
+    )
     support_code = models.CharField(max_length=64, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -78,10 +100,24 @@ class Transaction(models.Model):
         ('PAYMENT', 'Service Payment'),
         ('REFUND', 'Refund'),
     ]
-    wallet = models.ForeignKey(Wallet, on_delete=models.PROTECT, related_name="transactions")
+    wallet = models.ForeignKey(
+        Wallet, 
+        on_delete=models.PROTECT, 
+        related_name="transactions"
+    )
     payment_type = models.CharField(max_length=16, choices=PAYMENT_TYPE_CHOICES)
-    amount = models.DecimalField(max_digits=14, decimal_places=2, validators=[MinValueValidator(Decimal("0.01"))])
-    cart = models.ForeignKey(Cart, on_delete=models.SET_NULL, related_name="cart_transactions", blank=True, null=True)
+    amount = models.DecimalField(
+        max_digits=14, 
+        decimal_places=2, 
+        validators=[MinValueValidator(Decimal("0.01"))]
+    )
+    cart = models.ForeignKey(
+        Cart, 
+        on_delete=models.SET_NULL, 
+        related_name="cart_transactions", 
+        blank=True, 
+        null=True
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
