@@ -66,6 +66,3 @@ class Doctor(models.Model):
 
     def get_specialties(self):
         return ", ".join(specialty for specialty in self.specialties.all())
-
-
-
