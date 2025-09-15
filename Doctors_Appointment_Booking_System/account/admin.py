@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User, Doctor, Specialty
+from .models import User, Doctor, Specialty, Patient
 from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
 
 
@@ -12,11 +12,15 @@ class UserAdmin(DjangoUserAdmin):
     def is_doctor_flag(self, obj):
         return obj.is_doctor()
 
+    @admin.display(boolean=True, description="Patient")
+    def is_patient_flag(self, obj):
+        return obj.is_patient()
+
     list_display = (
         "username", "id","first_name", "last_name",
         "gender", "national_code",
         "country", "province", "city",
-        "is_doctor_flag", "is_staff", "is_active",
+        "is_doctor_flag", "is_patient_flag","is_staff", "is_active",
     )
 
     list_filter = (
@@ -73,5 +77,27 @@ class DoctorAdmin(admin.ModelAdmin):
     )
     filter_horizontal = ("specialties",)
     list_filter = ("specialties",)
+
+    autocomplete_fields = ("user",)
+
+
+@admin.register(Patient)
+class PatientAdmin(admin.ModelAdmin):
+    @admin.display(ordering="user__username", description="User")
+    def user_display(self, obj):
+        return obj.user.get_full_name() or obj.user.username
+
+    @admin.display(description="City")
+    def city(self, obj):
+        return getattr(obj.user.city, "name", "")
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return qs.prefetch_related("user", "user__city")
+
+    list_display = ("user_display", "id", "city")
+    search_fields = (
+        "user__username", "user__first_name", "user__last_name", "user__email",
+    )
 
     autocomplete_fields = ("user",)

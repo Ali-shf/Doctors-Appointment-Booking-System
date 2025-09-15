@@ -23,6 +23,9 @@ class User(AbstractUser):
     def is_doctor(self) -> bool:
         return hasattr(self, "doctor_profile")
 
+    def is_patient(self) -> bool:
+        return hasattr(self, "patient_profile")
+
 
 class Specialty(models.Model):
     class Code(models.TextChoices):
@@ -67,5 +70,10 @@ class Doctor(models.Model):
     def get_specialties(self):
         return ", ".join(specialty for specialty in self.specialties.all())
 
-
+class Patient(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="patient_profile"
+    )
 
