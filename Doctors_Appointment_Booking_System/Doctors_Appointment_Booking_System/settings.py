@@ -37,11 +37,18 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    "cities_light",
     'account',
     'reservation',
     'doctor',
     'wallet',
 ]
+
+CITIES_LIGHT_INCLUDE_COUNTRIES = ("IR",)
+
+CITIES_LIGHT_CITY_SOURCES = (
+    'https://download.geonames.org/export/dump/cities15000.zip',  # only cities >15k pop
+)
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
