@@ -17,7 +17,7 @@ class UserAdmin(DjangoUserAdmin):
         return obj.is_patient()
 
     list_display = (
-        "username", "id","first_name", "last_name",
+        "username", "id","first_name", "last_name", "phone",
         "gender", "national_code",
         "country", "province", "city",
         "is_doctor_flag", "is_patient_flag","is_staff", "is_active",
@@ -28,7 +28,7 @@ class UserAdmin(DjangoUserAdmin):
         "gender",
     )
 
-    search_fields = ("username", "first_name", "last_name", "email", "national_code")
+    search_fields = ("username", "first_name", "last_name", "phone","email", "national_code")
     ordering = ("username",)
 
     autocomplete_fields = ("country", "province", "city")
@@ -36,7 +36,7 @@ class UserAdmin(DjangoUserAdmin):
     fieldsets = DjangoUserAdmin.fieldsets + (
         (("Profile"), {
             "fields": (
-                "gender", "national_code",
+                "gender", "phone", "national_code",
                 "country", "province", "city",
                 "address",
             )
@@ -62,6 +62,10 @@ class DoctorAdmin(admin.ModelAdmin):
     def city(self, obj):
         return getattr(obj.user.city, "name", "")
 
+    @admin.display(description="Mobile")
+    def mobile(self, obj):
+        return getattr(obj.user, "phone", "")
+
     @admin.display(description="Specialties")
     def specialties_list(self, obj):
         return ", ".join(str(s) for s in obj.specialties.all())
@@ -70,9 +74,9 @@ class DoctorAdmin(admin.ModelAdmin):
         qs = super().get_queryset(request)
         return qs.select_related("user", "user__city").prefetch_related("specialties")
 
-    list_display = ("user_display", "id","medical_id", "specialties_list","city")
+    list_display = ("user_display", "id","mobile","medical_id", "specialties_list","city")
     search_fields = (
-        "medical_id", "specialties__code",
+        "medical_id", "specialties__code","user__phone",
         "user__username", "user__first_name", "user__last_name", "user__email",
     )
     filter_horizontal = ("specialties",)
@@ -91,13 +95,17 @@ class PatientAdmin(admin.ModelAdmin):
     def city(self, obj):
         return getattr(obj.user.city, "name", "")
 
+    @admin.display(description="Mobile")
+    def mobile(self, obj):
+        return getattr(obj.user.phone)
+
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         return qs.prefetch_related("user", "user__city")
 
-    list_display = ("user_display", "id", "city")
+    list_display = ("user_display", "id", "mobile","city")
     search_fields = (
-        "user__username", "user__first_name", "user__last_name", "user__email",
+        "user__username", "user__first_name", "user__phone","user__last_name", "user__email",
     )
 
     autocomplete_fields = ("user",)

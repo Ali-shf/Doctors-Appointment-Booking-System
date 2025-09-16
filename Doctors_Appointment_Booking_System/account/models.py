@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from cities_light.models import Country, Region, City
 from django.conf import settings
+from django.core.validators import RegexValidator
+
 
 
 class User(AbstractUser):
@@ -10,6 +12,19 @@ class User(AbstractUser):
         ("F", "Female"),
         ("O", "Other"),
     ]
+
+    phone_regex = RegexValidator(
+    regex=r'^(?:\+98|0)?9\d{9}$',
+    message="Phone number must start with 09 (e.g., 09123456789) or +98 (e.g., +989123456789)."
+    )
+    phone = models.CharField(
+        validators=[phone_regex],
+        max_length=11,
+        unique=False,
+        blank=True,
+        null=True,
+    )
+
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, blank=True, null=True)
     updated_at = models.DateTimeField(blank=True, null=True)
     national_code = models.CharField(max_length=10, blank=True, null=True)
