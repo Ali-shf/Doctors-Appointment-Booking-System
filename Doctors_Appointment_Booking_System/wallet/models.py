@@ -45,7 +45,7 @@ class Wallet(models.Model):
             wallet=self,
             payment_type='PAYMENT',
             amount=amount,
-            cart=cart,
+            cart=cart, # Link to the cart if provided
         )
         return self.balance
     
