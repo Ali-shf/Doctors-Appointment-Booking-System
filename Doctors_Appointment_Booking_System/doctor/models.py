@@ -21,7 +21,7 @@ class Clinic(models.Model):
     
 
 
-class Comments(models.Model):
+class Comment(models.Model):
     patient_id = models.ForeignKey("account.Patient", related_name=("comments"), on_delete=models.CASCADE)
     doctor_id = models.ForeignKey("account.Doctor", related_name=("comments_received"), on_delete=models.CASCADE , null=True, blank=True)
     clinic_id = models.ForeignKey("doctor.Clinic", related_name=("comments_received"), on_delete=models.CASCADE , null=True, blank=True)
