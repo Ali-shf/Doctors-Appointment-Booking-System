@@ -1,6 +1,7 @@
 from django.db import models
 from django.urls import reverse
 from django.core.validators import MinValueValidator, MaxValueValidator
+from cities_light.models import Country, Region, City
 
 
 class Clinic(models.Model):
@@ -9,7 +10,15 @@ class Clinic(models.Model):
     address = models.CharField(max_length=500 , blank=True)
     working_hours = models.JSONField(default=dict , blank=False)
     description = models.TextField(blank=True)
-
+    country = models.ForeignKey(
+        Country, on_delete=models.SET_NULL, null=True, blank=True, related_name="clinics"
+    )
+    region = models.ForeignKey(
+        Region, on_delete=models.SET_NULL, null=True, blank=True, related_name="clinics"
+    )
+    city = models.ForeignKey(
+        City, on_delete=models.SET_NULL, null=True, blank=True, related_name="clinics"
+    )
     class Meta:
         ordering = ["name"]
 
