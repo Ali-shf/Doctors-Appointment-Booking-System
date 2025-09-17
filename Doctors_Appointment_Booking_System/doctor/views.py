@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404
 from .models import Comment, Doctor, Patient
 from .forms import CommentForm
 from doctor.models import Clinic
+from django.db.models import Avg
 from doctor.forms import ClinicForm
 
 
@@ -15,10 +16,26 @@ class ClinicListView(ListView):
     template_name = "clinic/clinic_list.html"
     context_object_name = "clinics"
 
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .annotate(avg_rate=Avg("comments_received__rate"))
+            .order_by("name")
+        )
+
 class ClinicDetailView(DetailView):
     model = Clinic
     template_name = "clinic/clinic_detail.html"
     context_object_name = "clinic"
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .annotate(avg_rate=Avg("comments_received__rate"))
+            .order_by("name")
+        )
 
 class ClinicCreateView(LoginRequiredMixin, PermissionRequiredMixin , CreateView):
     permission_required = "app.add_clinic"
@@ -92,13 +109,13 @@ class CommentDoctorListView(ListView):
 
         return qs
 
-class CommentDetailView(DetailView):
+class detail_comment_view(DetailView):
     model = Comment
     template_name = "comment/comment_detail.html"
     context_object_name = "comment"
 
 
-class CommentCreateView(LoginRequiredMixin, CreateView):
+class add_comment_view(LoginRequiredMixin, CreateView):
     model = Comment
     form_class = CommentForm
     template_name = "comment/comment_form.html"
@@ -128,7 +145,7 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
         return self.request.GET.get("next") or reverse("comment:detail", args=[self.object.pk])
 
 
-class CommentUpdateView(LoginRequiredMixin, UpdateView):
+class edit_comment_view(LoginRequiredMixin, UpdateView):
     model = Comment
     form_class = CommentForm
     template_name = "comment/comment_form.html"
@@ -137,7 +154,19 @@ class CommentUpdateView(LoginRequiredMixin, UpdateView):
         return self.request.GET.get("next") or reverse("comment:detail", args=[self.object.pk])
 
 
-class CommentDeleteView(LoginRequiredMixin, DeleteView):
+class delete_comment_view(LoginRequiredMixin, DeleteView):
     model = Comment
     template_name = "comment/comment_confirm_delete.html"
     success_url = reverse_lazy("comment:list")
+
+
+class clinic_rating_summary_view():
+    model = Clinic
+    template_name = 'clinic/clinic_rates_summeru.html'
+    context_object_name = 'clinics'
+
+    def get_queryset(self):
+        return (
+            Clinic.objects.annotate(avg_rate=Avg('comments_recieved__rate'))
+        )
+    
