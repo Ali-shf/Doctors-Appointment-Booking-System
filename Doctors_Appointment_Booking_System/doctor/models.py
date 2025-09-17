@@ -11,13 +11,13 @@ class Clinic(models.Model):
     working_hours = models.JSONField(default=dict , blank=False)
     description = models.TextField(blank=True)
     country = models.ForeignKey(
-        Country, on_delete=models.SET_NULL, null=True, blank=True, related_name="clinics"
+        Country, on_delete=models.SET_NULL, null=False, blank=False, related_name="clinics"
     )
     region = models.ForeignKey(
-        Region, on_delete=models.SET_NULL, null=True, blank=True, related_name="clinics"
+        Region, on_delete=models.SET_NULL, null=False, blank=False, related_name="clinics"
     )
     city = models.ForeignKey(
-        City, on_delete=models.SET_NULL, null=True, blank=True, related_name="clinics"
+        City, on_delete=models.SET_NULL, null=False, blank=False, related_name="clinics"
     )
     class Meta:
         ordering = ["name"]
@@ -41,6 +41,7 @@ class Comment(models.Model):
 def __str__(self):
     if self.doctor_id and self.clinik_id:
         return f"{self.patient_id} | {self.doctor_id} |  {self.clinic_id} ({self.rate})"
+    
     elif self.doctor_id :
         return f"{self.patient_id} | {self.doctor_id} |  'no clinic' ({self.rate})"
     else:
