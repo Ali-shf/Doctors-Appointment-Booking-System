@@ -20,5 +20,4 @@ class CommentAdmin(admin.ModelAdmin):
     autocomplete_fields = ("doctor", "patient", "visit")
     readonly_fields = ("id", "clinic_id", "doctor_id", "patient_id", "rate", "created_at", "comment")
 
-
-
+#TODO: CSV export
