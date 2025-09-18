@@ -20,7 +20,7 @@ class User(AbstractUser):
     phone = models.CharField(
         validators=[phone_regex],
         max_length=11,
-        unique=False,
+        unique=True,
         blank=True,
         null=True,
     )

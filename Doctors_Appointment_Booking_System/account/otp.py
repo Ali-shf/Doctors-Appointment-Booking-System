@@ -37,9 +37,8 @@ def verify_otp(phone: str, purpose: str, otp: str) -> bool:
 
     hashed_saved = cache.get(k)
     if not hashed_saved:
-        return False  # منقضی یا وجود ندارد
+        return False
 
-    # ریت‌لیمیت روی تلاش‌ها
     attempts = cache.get(attempts_k) or 0
     if attempts >= settings.OTP_MAX_ATTEMPTS:
         return False

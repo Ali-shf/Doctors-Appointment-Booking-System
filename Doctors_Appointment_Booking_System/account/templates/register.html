@@ -35,12 +35,21 @@
                     {{ form.username }}
                     {% for err in form.username.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
                   </div>
+                </div>
+
+              <div class="two-col">
                   <div>
                     <label class="form-label">Email</label>
                     {{ form.email }}
                     {% for err in form.email.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
                   </div>
-                </div>
+                  <div>
+                    <label class="form-label">Phone</label>
+                    {{ form.phone }}
+                    {% for err in form.phone.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+                  </div>
+              </div>
+
 
                 <div class="two-col mt-2">
                   <div>

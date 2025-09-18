@@ -97,7 +97,7 @@ class PatientAdmin(admin.ModelAdmin):
 
     @admin.display(description="Mobile")
     def mobile(self, obj):
-        return getattr(obj.user.phone)
+        return getattr(obj.user, "phone", "")
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)

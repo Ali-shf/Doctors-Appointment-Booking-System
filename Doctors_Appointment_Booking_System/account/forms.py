@@ -3,6 +3,7 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.core.validators import RegexValidator
 from .models import Country, Region, City, Doctor, Patient, Specialty
 from django.contrib.auth import get_user_model
+import re
 
 User = get_user_model()
 
@@ -34,7 +35,7 @@ class RegisterForm(PrettyMixin, UserCreationForm):
         max_length=13,
         required=True,
         validators=[iran_phone_regex],
-        help_text="مثال: 09123456789 یا +989123456789"
+        help_text="example: 09123456789 or +989123456789"
     )
 
     gender = forms.ChoiceField(choices=User.GENDER_CHOICES, required=False)
@@ -83,3 +84,51 @@ class PrettyAuthenticationForm(PrettyMixin, AuthenticationForm):
     def __init__(self, request=None, *args, **kwargs):
         super().__init__(request=request, *args, **kwargs)
         self._beautify()
+
+class UserProfileForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ["first_name", "last_name", "email", "phone",
+                  "gender", "national_code", "country", "province", "city", "address"]
+        widgets = {f: forms.TextInput(attrs={"class": "form-control"}) for f in
+                   ["first_name", "last_name", "email", "phone", "national_code"]}
+        widgets.update({
+            "gender": forms.Select(attrs={"class": "form-select"}),
+            "country": forms.Select(attrs={"class": "form-select"}),
+            "province": forms.Select(attrs={"class": "form-select"}),
+            "city": forms.Select(attrs={"class": "form-select"}),
+            "address": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
+        })
+
+    def clean_phone(self):
+        phone = self.cleaned_data.get("phone")
+        if not phone:
+            return phone
+        # Normalize to 09xxxxxxxxx (Iran local) to fit max_length=11
+        phone = phone.strip()
+        if phone.startswith("+98"):
+            phone = "0" + phone[3:]
+        phone = re.sub(r"\D", "", phone)
+        if not re.fullmatch(r"09\d{9}", phone):
+            raise forms.ValidationError("Use 09xxxxxxxxx or +98 format.")
+        return phone
+
+class DoctorForm(forms.ModelForm):
+    class Meta:
+        model = Doctor
+        fields = ["university",
+                  "medical_id", "specialties"]
+        widgets = {
+            "university": forms.TextInput(attrs={"class": "form-control"}),
+            # "contract_started": forms.DateTimeInput(attrs={"type": "datetime-local", "class": "form-control"}),
+            # "contract_end": forms.DateTimeInput(attrs={"type": "datetime-local", "class": "form-control"}),
+            "medical_id": forms.TextInput(attrs={"class": "form-control"}),
+            # "rate": forms.NumberInput(attrs={"class": "form-control", "step": "0.1"}),
+            "specialties": forms.SelectMultiple(attrs={"class": "form-select", "size": 8}),
+        }
+
+
+class PatientForm(forms.ModelForm):
+    class Meta:
+        model = Patient
+        fields = []

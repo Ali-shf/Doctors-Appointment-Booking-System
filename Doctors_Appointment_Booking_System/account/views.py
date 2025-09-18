@@ -1,23 +1,28 @@
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.db import transaction
-from django.contrib.auth import get_user_model
-from sqlalchemy.sql.coercions import expect
-
 from .forms import RegisterForm, PrettyAuthenticationForm
-from .models import Doctor, Patient
-
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.conf import settings
 from kavenegar import KavenegarAPI, APIException, HTTPException
 from .otp import gen_otp, save_otp, verify_otp, can_resend
+from django.contrib.auth.decorators import login_required
+from django.views.generic import DetailView, UpdateView
+from django.contrib import messages
+from django.urls import reverse_lazy
+from django.contrib.auth import get_user_model
+from .models import Doctor, Patient
+from .forms import UserProfileForm, DoctorForm, PatientForm
+from django.contrib.auth.mixins import LoginRequiredMixin
+
+
 
 User = get_user_model()
 
+# <--- Login, Logout, Register --->
 def login_view(request):
     if request.user.is_authenticated:
         pass
@@ -27,18 +32,16 @@ def login_view(request):
         user = form.get_user()
         login(request, user)
         messages.success(request, f"Welcome back, {user.username}!")
+        if user.is_superuser:
+            return redirect("admin:index")
         next_url = request.GET.get("next") or reverse("dashboard")
         return redirect(next_url)
     return render(request, "login.html", {"form": form})
-
-
 def logout_view(request):
     if request.user.is_authenticated:
         logout(request)
         messages.info(request, "You have been logged out.")
     return redirect("login")
-
-
 @transaction.atomic
 def register_view(request):
     if request.user.is_authenticated:
@@ -81,13 +84,11 @@ def register_view(request):
         form = RegisterForm()
     return render(request, "register.html", {"form": form})\
 
-
+# <--- OTP --->
 API = KavenegarAPI('6A6E2B65653743652F36637775654B5948685A6156524C466F32734D7A78494A4E316A64337275725849513D')
 PURPOSE = "login"
-
 def otp_login_page(request):
     return render(request, "otp_login.html")
-
 @require_POST
 def send_code(request):
     phone = request.POST.get("phone")
@@ -106,8 +107,7 @@ def send_code(request):
     except (APIException, HTTPException) as e:
         return JsonResponse({"ok": False, "error": str(e)}, status=502)
 
-    return JsonResponse({"ok": True})
-
+    return JsonResponse({"ok": True, "message" : "OTP sent successfully"})
 @require_POST
 def verify_code(request):
     phone = request.POST.get("phone")
@@ -126,6 +126,105 @@ def verify_code(request):
     if not user.is_active:
         return JsonResponse({"ok": False, "error": "user not active"}, status=404)
 
-    login(request, user)
+    if user.is_superuser:
+        return redirect("admin:index")
 
-    return JsonResponse({"ok": True})
+    return redirect(reverse("dashboard"))
+
+# <--- Profile Redirect --->
+@login_required
+def me_redirect(request):
+    if hasattr(request.user, "doctor_profile"):
+        return redirect("doctor_profile")
+    if hasattr(request.user, "patient_profile"):
+        return redirect("patient_profile")
+    messages.info(request, "You don’t have a role yet.")
+    return redirect("/")
+
+# <--- Profile Detail Views --->
+class DoctorProfileDetail(LoginRequiredMixin, DetailView):
+    template_name = "doctor_profile.html"
+    model = Doctor
+    context_object_name = "doctor"
+
+    def get_object(self, queryset=None):
+        return self.request.user.doctor_profile
+
+class PatientProfileDetail(LoginRequiredMixin, DetailView):
+    template_name = "patient_profile.html"
+    model = Patient
+    context_object_name = "patient"
+
+    def get_object(self, queryset=None):
+        return self.request.user.patient_profile
+
+
+# <---- Update ---->
+class DoctorProfileUpdate(LoginRequiredMixin, UpdateView):
+    template_name = "doctor_edit.html"
+    form_class = DoctorForm
+    second_form_class = UserProfileForm
+    success_url = reverse_lazy("doctor_profile")
+
+    def get_object(self, queryset=None):
+        return self.request.user.doctor_profile
+
+    def get_contextDataForms(self):
+        doctor = self.get_object()
+        if self.request.method == "POST":
+            return (self.second_form_class(self.request.POST, instance=self.request.user),
+                    self.form_class(self.request.POST, instance=doctor))
+        return (self.second_form_class(instance=self.request.user),
+                self.form_class(instance=doctor))
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        user_form, doctor_form = self.get_contextDataForms()
+        ctx["user_form"] = user_form
+        ctx["doctor_form"] = doctor_form
+        return ctx
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        user_form, doctor_form = self.get_contextDataForms()
+        if user_form.is_valid() and doctor_form.is_valid():
+            user_form.save()
+            doctor_form.save()
+            messages.success(request, "Profile updated.")
+            return redirect(self.success_url)
+        return self.render_to_response(self.get_context_data())
+
+
+class PatientProfileUpdate(LoginRequiredMixin, UpdateView):
+    template_name = "patient_edit.html"
+    form_class = PatientForm
+    second_form_class = UserProfileForm
+    success_url = reverse_lazy("patient_profile")
+
+    def get_object(self, queryset=None):
+        return self.request.user.patient_profile
+
+    def get_contextDataForms(self):
+        patient = self.get_object()
+        if self.request.method == "POST":
+            return (self.second_form_class(self.request.POST, instance=self.request.user),
+                    self.form_class(self.request.POST, instance=patient))
+        return (self.second_form_class(instance=self.request.user),
+                self.form_class(instance=patient))
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        user_form, patient_form = self.get_contextDataForms()
+        ctx["user_form"] = user_form
+        ctx["patient_form"] = patient_form
+        return ctx
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        user_form, patient_form = self.get_contextDataForms()
+        if user_form.is_valid() and patient_form.is_valid():
+            user_form.save()
+            patient_form.save()
+            messages.success(request, "Profile updated.")
+            return redirect(self.success_url)
+        return self.render_to_response(self.get_context_data())
