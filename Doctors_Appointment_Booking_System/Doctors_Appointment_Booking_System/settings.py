@@ -38,11 +38,24 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     "cities_light",
-    'account',
+    "account.apps.AccountConfig",
     'reservation',
     'doctor',
     'wallet',
+    "allauth", "allauth.account", "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
+    "django.contrib.sites",
 ]
+
+AUTH_USER_MODEL = "user_account.User"
+
+
+SITE_ID = 1
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
+]
+LOGIN_REDIRECT_URL = "/"
 
 CITIES_LIGHT_INCLUDE_COUNTRIES = ("IR",)
 
@@ -56,6 +69,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    "allauth.account.middleware.AccountMiddleware",
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -133,9 +147,6 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-AUTH_USER_MODEL = "account.User"
-
 
 CACHES = {
     "default": {

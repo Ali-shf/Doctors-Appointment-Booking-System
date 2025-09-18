@@ -15,7 +15,6 @@ urlpatterns = [
     path("login/otp/", otp_login_page, name="otp-login-page"),
     path("api/login/otp/send/", send_code, name="otp-send"),
     path("api/login/otp/verify/", verify_code, name="otp-verify"),
-
 #   <--- Profile --->
     path("me/", views.me_redirect, name="me"),
     path("me/patient/", views.PatientProfileDetail.as_view(), name="patient_profile"),
