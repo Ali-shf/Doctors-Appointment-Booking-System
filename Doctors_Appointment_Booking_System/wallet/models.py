@@ -62,7 +62,7 @@ class Wallet(models.Model):
                 wallet=w, 
                 payment_type="PAYMENT", 
                 amount=amount, 
-                cart=cart
+                cart=cart # Optional to link cart to transation
             )
             self.refresh_from_db(fields=["balance"])
         return self.balance

@@ -1,7 +1,7 @@
 from django.contrib import admin
-from .models import Timesheet,Visit,EmailMessage
+from .models import TimeSheet,Visit,EmailMessage
 
-@admin.register(Timesheet)
+@admin.register(TimeSheet)
 class TimesheetAdmin(admin.ModelAdmin):
     
     list_display = ("doctor","clinic","end")
