@@ -1,6 +1,6 @@
 from django.db import models
-from doctor.models import Doctor,Clinic
-from account.models import User
+from doctor.models import Clinic
+from account.models import Doctor,User
 
 
 

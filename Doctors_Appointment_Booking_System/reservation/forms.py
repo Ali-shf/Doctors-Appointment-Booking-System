@@ -1,9 +1,9 @@
 from django import forms
-from .models import Timesheet, Visit, EmailMessage
+from .models import TimeSheet, Visit, EmailMessage
 
 class TimesheetForm(forms.ModelForm):
     class Meta:
-        model = Timesheet
+        model = TimeSheet
         fields = ["doctor", "clinic", "end", "visit_time"]
         widgets = {
             "end": forms.DateTimeInput(attrs={"type": "datetime-local"}),
