@@ -17,6 +17,8 @@ from django.contrib.auth import get_user_model
 from .models import Doctor, Patient
 from .forms import UserProfileForm, DoctorForm, PatientForm
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Q
+
 
 
 
@@ -25,8 +27,7 @@ User = get_user_model()
 # <--- Login, Logout, Register --->
 def login_view(request):
     if request.user.is_authenticated:
-        pass
-        #return redirect("dashboard")
+        return redirect("doctors_list")
     form = PrettyAuthenticationForm(request, data=request.POST or None)
     if request.method == "POST" and form.is_valid():
         user = form.get_user()
@@ -34,7 +35,7 @@ def login_view(request):
         messages.success(request, f"Welcome back, {user.username}!")
         if user.is_superuser:
             return redirect("admin:index")
-        next_url = request.GET.get("next") or reverse("dashboard")
+        next_url = request.GET.get("next") or reverse("doctors_list")
         return redirect(next_url)
     return render(request, "login.html", {"form": form})
 def logout_view(request):
@@ -130,7 +131,6 @@ def verify_code(request):
         return redirect("admin:index")
 
     return redirect(reverse("dashboard"))
-
 # <--- Profile Redirect --->
 @login_required
 def me_redirect(request):
@@ -140,7 +140,6 @@ def me_redirect(request):
         return redirect("patient_profile")
     messages.info(request, "You don’t have a role yet.")
     return redirect("/")
-
 # <--- Profile Detail Views --->
 class DoctorProfileDetail(LoginRequiredMixin, DetailView):
     template_name = "doctor_profile.html"
@@ -149,7 +148,6 @@ class DoctorProfileDetail(LoginRequiredMixin, DetailView):
 
     def get_object(self, queryset=None):
         return self.request.user.doctor_profile
-
 class PatientProfileDetail(LoginRequiredMixin, DetailView):
     template_name = "patient_profile.html"
     model = Patient
@@ -157,8 +155,6 @@ class PatientProfileDetail(LoginRequiredMixin, DetailView):
 
     def get_object(self, queryset=None):
         return self.request.user.patient_profile
-
-
 # <---- Update ---->
 class DoctorProfileUpdate(LoginRequiredMixin, UpdateView):
     template_name = "doctor_edit.html"
@@ -193,8 +189,6 @@ class DoctorProfileUpdate(LoginRequiredMixin, UpdateView):
             messages.success(request, "Profile updated.")
             return redirect(self.success_url)
         return self.render_to_response(self.get_context_data())
-
-
 class PatientProfileUpdate(LoginRequiredMixin, UpdateView):
     template_name = "patient_edit.html"
     form_class = PatientForm
@@ -228,3 +222,60 @@ class PatientProfileUpdate(LoginRequiredMixin, UpdateView):
             messages.success(request, "Profile updated.")
             return redirect(self.success_url)
         return self.render_to_response(self.get_context_data())
+# <--- Public Profile --->
+from django.views.generic import ListView, DetailView
+from .models import Doctor, Specialty
+
+class DoctorPublicList(ListView):
+    template_name = "doctors_list.html"
+    model = Doctor
+    context_object_name = "doctors"
+    paginate_by = 12
+
+    def get_queryset(self):
+        qs = (Doctor.objects
+              .select_related("user")
+              .prefetch_related("specialties")
+              .order_by("user__last_name", "user__first_name"))
+
+        q = self.request.GET.get("q", "").strip()
+        specs = self.request.GET.getlist("specialty")
+
+        if q:
+            qs = qs.filter(
+                Q(user__first_name__icontains=q) |
+                Q(user__last_name__icontains=q) |
+                Q(user__username__icontains=q) |
+                Q(university__icontains=q) |
+                Q(medical_id__icontains=q)
+            )
+        if specs:
+            qs = qs.filter(specialties__code__in=specs)
+
+        return qs.distinct()
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        q = self.request.GET.get("q", "")
+        selected_specs = self.request.GET.getlist("specialty")
+
+        # build querystring for pagination without the page param
+        querydict = self.request.GET.copy()
+        querydict.pop("page", None)
+        ctx["query_string"] = querydict.urlencode()
+
+        ctx["q"] = q
+        ctx["specialties_selected"] = set(selected_specs)
+        ctx["specialties"] = Specialty.objects.all().order_by("code")
+        return ctx
+
+class DoctorPublicDetail(DetailView):
+    template_name = "doctor_public_detail.html"
+    model = Doctor
+    context_object_name = "doctor"
+
+    def get_queryset(self):
+        return (Doctor.objects
+                .select_related("user")
+                .prefetch_related("specialties"))
+

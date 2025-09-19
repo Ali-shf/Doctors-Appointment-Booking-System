@@ -33,4 +33,6 @@ urlpatterns = [
          ),
          name="password_change_done"
     ),
+    path("doctors/", views.DoctorPublicList.as_view(), name="doctors_list"),
+    path("doctors/<int:pk>/", views.DoctorPublicDetail.as_view(), name="doctor_public_detail"),
 ]
