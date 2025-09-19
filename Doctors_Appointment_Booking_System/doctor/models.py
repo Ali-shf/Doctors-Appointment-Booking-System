@@ -2,7 +2,7 @@ from django.db import models
 from django.urls import reverse
 from django.core.validators import MinValueValidator, MaxValueValidator
 from cities_light.models import Country, Region, City
-
+from account.models import Doctor, Patient
 
 class Clinic(models.Model):
     name = models.CharField(max_length=255)
@@ -11,13 +11,13 @@ class Clinic(models.Model):
     working_hours = models.JSONField(default=dict , blank=False)
     description = models.TextField(blank=True)
     country = models.ForeignKey(
-        Country, on_delete=models.SET_NULL, null=False, blank=False, related_name="clinics"
+        Country, on_delete=models.SET_NULL, null=True, blank=False, related_name="clinics"
     )
     region = models.ForeignKey(
-        Region, on_delete=models.SET_NULL, null=False, blank=False, related_name="clinics"
+        Region, on_delete=models.SET_NULL, null=True, blank=False, related_name="clinics"
     )
     city = models.ForeignKey(
-        City, on_delete=models.SET_NULL, null=False, blank=False, related_name="clinics"
+        City, on_delete=models.SET_NULL, null=True, blank=False, related_name="clinics"
     )
     class Meta:
         ordering = ["name"]
@@ -31,8 +31,8 @@ class Clinic(models.Model):
 
 
 class Comment(models.Model):
-    patient_id = models.ForeignKey("account.Patient", related_name=("comments"), on_delete=models.CASCADE)
-    doctor_id = models.ForeignKey("account.Doctor", related_name=("comments_received"), on_delete=models.CASCADE , null=True, blank=True)
+    patient_id = models.ForeignKey(Patient, related_name=("comments"), on_delete=models.CASCADE)
+    doctor_id = models.ForeignKey(Doctor, related_name=("comments_received"), on_delete=models.CASCADE , null=True, blank=True)
     clinic_id = models.ForeignKey("doctor.Clinic", related_name=("comments_received"), on_delete=models.CASCADE , null=True, blank=True)
     comment = models.TextField()
     created_at = models.DateTimeField(auto_created=True)

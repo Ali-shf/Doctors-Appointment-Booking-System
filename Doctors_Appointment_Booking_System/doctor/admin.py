@@ -17,7 +17,8 @@ class ClinicAdmin(admin.ModelAdmin):
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
     list_display = ("id", "clinic_id", "doctor_id", "patient_id", "rate", "created_at", "comment")
-    autocomplete_fields = ("doctor", "patient", "visit")
+    autocomplete_fields = ("doctor_id", "patient_id", "clinic_id")  # corrected
     readonly_fields = ("id", "clinic_id", "doctor_id", "patient_id", "rate", "created_at", "comment")
+
 
 #TODO: CSV export
