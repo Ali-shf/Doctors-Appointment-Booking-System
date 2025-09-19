@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}My Doctor Profile{% endblock %}
+{% block content %}
+
+<div class="row g-4">
+  <div class="col-lg-4">
+    <div class="card p-3">
+      <div class="text-center">
+        <div class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center"
+             style="width:96px;height:96px;font-size:36px;">
+          {{ request.user.first_name|default:request.user.username|first|upper }}
+        </div>
+        <h5 class="mt-3 mb-0">{{ request.user.get_full_name|default:request.user.username }}</h5>
+        <div class="text-muted">{{ request.user.email|default:"—" }}</div>
+        <div class="text-muted">{{ request.user.phone|default:"—" }}</div>
+      </div>
+      <hr>
+      <dl class="row mb-0">
+        <dt class="col-5">Gender</dt><dd class="col-7">{{ request.user.get_gender_display|default:"—" }}</dd>
+        <dt class="col-5">National code</dt><dd class="col-7">{{ request.user.national_code|default:"—" }}</dd>
+        <dt class="col-5">Location</dt>
+        <dd class="col-7">
+          {% if request.user.country %}{{ request.user.country.name }}{% endif %}
+          {% if request.user.province %} / {{ request.user.province.name }}{% endif %}
+          {% if request.user.city %} / {{ request.user.city.name }}{% endif %}
+          {% if not request.user.country and not request.user.province and not request.user.city %}—{% endif %}
+        </dd>
+        <dt class="col-5">Address</dt><dd class="col-7">{{ request.user.address|default:"—" }}</dd>
+      </dl>
+    </div>
+  </div>
+
+  <div class="col-lg-8">
+    <div class="card p-4">
+      <div class="d-flex align-items-center justify-content-between">
+        <h4 class="mb-0">Doctor Info</h4>
+        <div>
+          <a href="{% url 'doctor_edit' %}" class="btn btn-primary">Edit</a>
+          <a href="{% url 'password_change' %}" class="btn btn-outline-secondary">Change Password</a>
+        </div>
+      </div>
+      <hr>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <div class="small text-muted">University</div>
+          <div class="fw-semibold">{{ doctor.university|default:"—" }}</div>
+        </div>
+        <div class="col-md-6">
+          <div class="small text-muted">Medical ID</div>
+          <div class="fw-semibold">{{ doctor.medical_id }}</div>
+        </div>
+        <div class="col-md-6">
+          <div class="small text-muted">Contract start</div>
+          <div class="fw-semibold">{{ doctor.contract_started|date:"Y-m-d H:i"|default:"—" }}</div>
+        </div>
+        <div class="col-md-6">
+          <div class="small text-muted">Contract end</div>
+          <div class="fw-semibold">{{ doctor.contract_end|date:"Y-m-d H:i"|default:"—" }}</div>
+        </div>
+        <div class="col-12">
+          <div class="small text-muted mb-1">Specialties</div>
+          {% if doctor.specialties.all %}
+            {% for s in doctor.specialties.all %}
+              <span class="badge text-bg-primary me-1 mb-1">{{ s.get_code_display }}</span>
+            {% empty %}
+              —
+            {% endfor %}
+          {% else %}—{% endif %}
+        </div>
+        <div class="col-md-4">
+          <div class="small text-muted">Rate</div>
+          <div class="fw-semibold">{{ doctor.rate|default:"—" }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
