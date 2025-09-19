@@ -1,9 +1,4 @@
-from decimal import Decimal, InvalidOperation
-from django.conf import settings
-from django.core.validators import MinValueValidator
 from django.db import models
-from django.db import transaction as db_transaction
-from django.db.models import F
 
 
 class Wallet(models.Model):
@@ -122,3 +117,4 @@ class Transaction(models.Model):
 
     def __str__(self):
         return f"{self.payment_type} {self.amount} for wallet {self.wallet_id}"
+
