@@ -12,6 +12,18 @@
         <input name="q" value="{{ q }}" class="form-control"
                placeholder="Name, university, medical ID...">
       </div>
+      <div class="mt-2">
+          <small class="text-muted">
+            total match : {{ num_match }}
+          </small>
+      </div>
+      <div class="mt-2">
+        <small class="text-mutedya">
+            {% if is_paginated %}
+            showing : {{ page_obj.start_index }} - {{ page_obj.end_index }}
+            {% endif %}
+        </small>
+      </div>
     </div>
 
     <!-- RIGHT: Specialties filter (sidebar) -->

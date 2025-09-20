@@ -263,10 +263,10 @@ class DoctorPublicList(ListView):
         querydict = self.request.GET.copy()
         querydict.pop("page", None)
         ctx["query_string"] = querydict.urlencode()
-
         ctx["q"] = q
         ctx["specialties_selected"] = set(selected_specs)
         ctx["specialties"] = Specialty.objects.all().order_by("code")
+        ctx["num_match"] = self.object_list.count()
         return ctx
 
 class DoctorPublicDetail(DetailView):
