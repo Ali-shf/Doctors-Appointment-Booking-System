@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     "cities_light",
-    "account.apps.AccountConfig",
+    "user_account",
     'doctor',
     'reservation',
     'wallet',
