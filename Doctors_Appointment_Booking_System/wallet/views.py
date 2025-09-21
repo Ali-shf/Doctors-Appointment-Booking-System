@@ -1,9 +1,9 @@
+from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.utils import timezone
 from django.views.decorators.http import require_GET, require_POST
-
 from .models import Cart
 
 
@@ -122,3 +122,21 @@ def wallet_transactions(request):
             "results": results,
         }
     )
+
+
+
+# Templates views
+
+@login_required
+def index_page(request):
+    return render(request, 'wallet/index.html')
+
+
+@login_required
+def top_up_page(request):
+    return render(request, 'wallet/top_up.html')
+
+
+@login_required
+def transactions_page(request):
+    return render(request, 'wallet/transactions.hjtml')
