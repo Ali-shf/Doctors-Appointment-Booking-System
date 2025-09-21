@@ -41,7 +41,7 @@ class ClinicCreateView(LoginRequiredMixin, PermissionRequiredMixin , CreateView)
     permission_required = "app.add_clinic"
     model = Clinic
     form_class = ClinicForm
-    template_name = "clinic/clinic_form.html"
+    template_name = "doctor/clinic_form.html"
 
 
 class ClinicUpdateView(LoginRequiredMixin, PermissionRequiredMixin ,UpdateView):
