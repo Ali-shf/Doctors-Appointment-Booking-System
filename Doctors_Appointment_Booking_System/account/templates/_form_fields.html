@@ -1,0 +1,16 @@
+{% comment %}Usage: {% include "_form_fields.html" with form=user_form %}{% endcomment %}
+{% for field in form.visible_fields %}
+  <div class="mb-3">
+    <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+    {{ field }}
+    {% if field.help_text %}
+      <div class="form-text">{{ field.help_text }}</div>
+    {% endif %}
+    {% for err in field.errors %}
+      <div class="invalid-feedback d-block">{{ err }}</div>
+    {% endfor %}
+  </div>
+{% endfor %}
+{% for err in form.non_field_errors %}
+  <div class="alert alert-danger">{{ err }}</div>
+{% endfor %}

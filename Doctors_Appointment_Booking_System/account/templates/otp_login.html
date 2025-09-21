@@ -1,0 +1,49 @@
+<!-- templates/auth/otp_login.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>One Time Password</title>
+  <meta name="csrf-token" content="{{ csrf_token }}">
+</head>
+<body>
+  <h1>OTP Login</h1>
+
+  <label>Phone Number</label>
+  <input id="phone" placeholder="0912..." />
+
+  <button id="send">Send Code</button>
+
+  <div id="verify-box" style="display:none">
+    <label>کد</label>
+    <input id="code" />
+    <button id="verify">Verify</button>
+  </div>
+
+  <pre id="out"></pre>
+
+  <script>
+    function post(url, data) {
+      const form = new FormData();
+      for (const k in data) form.append(k, data[k]);
+      return fetch(url, { method: "POST", body: form, headers: { "X-CSRFToken": "{{ csrf_token }}" }})
+             .then(r => r.json());
+    }
+
+    document.getElementById('send').onclick = async () => {
+      const phone = document.getElementById('phone').value.trim();
+      const res = await post("{% url 'otp-send' %}", {phone});
+      document.getElementById('out').textContent = JSON.stringify(res,null,2);
+      if (res.ok) document.getElementById('verify-box').style.display = 'block';
+    };
+
+    document.getElementById('verify').onclick = async () => {
+      const phone = document.getElementById('phone').value.trim();
+      const code  = document.getElementById('code').value.trim();
+      const res = await post("{% url 'otp-verify' %}", {phone, code});
+      document.getElementById('out').textContent = JSON.stringify(res,null,2);
+      if (res.ok) window.location.href = "/";
+    };
+  </script>
+</body>
+</html>
