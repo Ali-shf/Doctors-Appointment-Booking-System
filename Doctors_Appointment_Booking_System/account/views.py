@@ -37,7 +37,7 @@ def login_view(request):
             return redirect("admin:index")
         next_url = request.GET.get("next") or reverse("doctors_list")
         return redirect(next_url)
-    return render(request, "login.html", {"form": form})
+    return render(request, "account/login.html", {"form": form})
 def logout_view(request):
     if request.user.is_authenticated:
         logout(request)
@@ -83,13 +83,13 @@ def register_view(request):
         # invalid => fallthrough
     else:
         form = RegisterForm()
-    return render(request, "register.html", {"form": form})\
+    return render(request, "account/register.html", {"form": form})\
 
 # <--- OTP --->
 API = KavenegarAPI('6A6E2B65653743652F36637775654B5948685A6156524C466F32734D7A78494A4E316A64337275725849513D')
 PURPOSE = "login"
 def otp_login_page(request):
-    return render(request, "otp_login.html")
+    return render(request, "account/otp_login.html")
 @require_POST
 def send_code(request):
     phone = request.POST.get("phone")
@@ -142,14 +142,14 @@ def me_redirect(request):
     return redirect("/")
 # <--- Profile Detail Views --->
 class DoctorProfileDetail(LoginRequiredMixin, DetailView):
-    template_name = "doctor_profile.html"
+    template_name = "account/doctor_profile.html"
     model = Doctor
     context_object_name = "doctor"
 
     def get_object(self, queryset=None):
         return self.request.user.doctor_profile
 class PatientProfileDetail(LoginRequiredMixin, DetailView):
-    template_name = "patient_profile.html"
+    template_name = "account/patient_profile.html"
     model = Patient
     context_object_name = "patient"
 
@@ -157,7 +157,7 @@ class PatientProfileDetail(LoginRequiredMixin, DetailView):
         return self.request.user.patient_profile
 # <---- Update ---->
 class DoctorProfileUpdate(LoginRequiredMixin, UpdateView):
-    template_name = "doctor_edit.html"
+    template_name = "account/doctor_edit.html"
     form_class = DoctorForm
     second_form_class = UserProfileForm
     success_url = reverse_lazy("doctor_profile")
@@ -190,7 +190,7 @@ class DoctorProfileUpdate(LoginRequiredMixin, UpdateView):
             return redirect(self.success_url)
         return self.render_to_response(self.get_context_data())
 class PatientProfileUpdate(LoginRequiredMixin, UpdateView):
-    template_name = "patient_edit.html"
+    template_name = "account/patient_edit.html"
     form_class = PatientForm
     second_form_class = UserProfileForm
     success_url = reverse_lazy("patient_profile")
@@ -227,7 +227,7 @@ from django.views.generic import ListView, DetailView
 from .models import Doctor, Specialty
 
 class DoctorPublicList(ListView):
-    template_name = "doctors_list.html"
+    template_name = "account/doctors_list.html"
     model = Doctor
     context_object_name = "doctors"
     paginate_by = 12
@@ -270,7 +270,7 @@ class DoctorPublicList(ListView):
         return ctx
 
 class DoctorPublicDetail(DetailView):
-    template_name = "doctor_public_detail.html"
+    template_name = "account/doctor_public_detail.html"
     model = Doctor
     context_object_name = "doctor"
 

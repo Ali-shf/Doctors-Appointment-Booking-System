@@ -23,13 +23,13 @@ urlpatterns = [
     path("me/patient/edit/", views.PatientProfileUpdate.as_view(), name="patient_edit"),
     path("me/doctor/edit/", views.DoctorProfileUpdate.as_view(), name="doctor_edit"),
     path("password/change/", auth_views.PasswordChangeView.as_view(
-            template_name="password_change.html",
+            template_name="account/password_change.html",
             success_url="/account/password/change/done/",
         ),
         name="password_change"
     ),
     path("password/change/done/", auth_views.PasswordChangeDoneView.as_view(
-             template_name="password_change_done.html"
+             template_name="account/password_change_done.html"
          ),
          name="password_change_done"
     ),
