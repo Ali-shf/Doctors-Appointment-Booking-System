@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Clinics Directory{% endblock %}
+{% block content %}
+<form class="mb-4">
+  <div class="row g-3 align-items-stretch">
+    <div class="col-12 col-lg-8">
+      <div class="card h-100 p-3">
+        <label class="form-label">Search</label>
+        <input name="q" value="{{ q }}" class="form-control"
+               placeholder="Name, city, address...">
+      </div>
+    </div>
+    <div class="col-12 col-lg-4">
+      <div class="card h-100 p-3">
+        <label class="form-label">Founded After</label>
+        <input type="date" name="founded_after" value="{{ founded_after }}" class="form-control">
+      </div>
+    </div>
+    <div class="col-12">
+      <div class="d-flex gap-2 justify-content-end">
+        <button class="btn btn-primary">Apply</button>
+        <a href="{% url 'doctor:clinics_list' %}" class="btn btn-outline-secondary">Reset</a>
+      </div>
+    </div>
+  </div>
+</form>
+
+<div class="row g-3">
+  {% for c in clinics %}
+    <div class="col-12 col-sm-6 col-lg-4">
+      <div class="card h-100 p-3">
+        <h5 class="fw-semibold">{{ c.name }}</h5>
+        <div class="text-muted small mb-2">{{ c.city.name }}, {{ c.city.region.name }}</div>
+        <p class="small">{{ c.address|truncatechars:80 }}</p>
+        <a href="{% url 'clinic_detail' c.pk %}" class="btn btn-outline-primary w-100 mt-auto">View Details</a>
+      </div>
+    </div>
+  {% empty %}
+    <div class="col-12"><div class="alert alert-info">No clinics found.</div></div>
+  {% endfor %}
+</div>
+{% endblock %}

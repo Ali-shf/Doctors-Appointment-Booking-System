@@ -14,7 +14,7 @@ class ClinicForm(forms.ModelForm):
 class CommentForm(forms.ModelForm):
     class Meta:
         model = Comment
-        fields = ["patient", "doctor", "visit", "rate", "comment"]
+        fields = ["patient_id", "doctor_id", "rate", "comment"]
         widgets = {
             "rate": forms.NumberInput(attrs={"min": 0, "max": 5}),
             "comment": forms.Textarea(attrs={"rows": 3}),

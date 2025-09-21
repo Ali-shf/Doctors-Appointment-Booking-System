@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Leave a Comment{% endblock %}
+{% block content %}
+<div class="card p-4">
+  <h4 class="mb-3">Your Feedback</h4>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <div class="mb-3">
+      {{ form.rate.label_tag }} 
+      {{ form.rate }}
+      {{ form.rate.errors }}
+    </div>
+    <div class="mb-3">
+      {{ form.text.label_tag }}
+      {{ form.text }}
+      {{ form.text.errors }}
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+    <a href="javascript:history.back()" class="btn btn-outline-secondary">Cancel</a>
+  </form>
+</div>
+{% endblock %}
