@@ -7,7 +7,6 @@ from .forms import RegisterForm, PrettyAuthenticationForm
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.conf import settings
-from kavenegar import KavenegarAPI, APIException, HTTPException
 from .otp import gen_otp, save_otp, verify_otp, can_resend
 from django.contrib.auth.decorators import login_required
 from django.views.generic import DetailView, UpdateView
@@ -18,6 +17,7 @@ from .models import Doctor, Patient
 from .forms import UserProfileForm, DoctorForm, PatientForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
+from .otp import gen_otp, save_otp, verify_otp, can_resend, send_email_otp
 
 
 
@@ -86,51 +86,67 @@ def register_view(request):
     return render(request, "account/register.html", {"form": form})\
 
 # <--- OTP --->
-API = KavenegarAPI('6A6E2B65653743652F36637775654B5948685A6156524C466F32734D7A78494A4E316A64337275725849513D')
-PURPOSE = "login"
+PURPOSE = "login_email"
+def _norm_email(value: str) -> str:
+    return (value or "").strip().lower()
 def otp_login_page(request):
     return render(request, "account/otp_login.html")
 @require_POST
 def send_code(request):
-    phone = request.POST.get("phone")
-    if not phone:
-        return JsonResponse({"ok": False, "error": "phone required"}, status=400)
+    email = _norm_email(request.POST.get("email"))
+    if not email:
+        return JsonResponse({"ok": False, "error": "email required"}, status=400)
 
-    if not can_resend(phone, PURPOSE, settings.OTP_RESEND_COOLDOWN):
+    if not can_resend(email, PURPOSE, settings.OTP_RESEND_COOLDOWN):
         return JsonResponse({"ok": False, "error": "cooldown"}, status=429)
 
     otp = gen_otp(6)
-    save_otp(phone, PURPOSE, otp)
+    save_otp(email, PURPOSE, otp)
+
+    # try:
+    #     send_email_otp(email, otp, subject="Verification Code")
+    # except Exception as e:
+    #     return JsonResponse({"ok": False, "error": "email send failed"}, status=502)
+
+    import logging
+    logger = logging.getLogger(__name__)
 
     try:
-        params = { "sender" : "2000660110", "receptor": phone, "message": f"Verification Code : {otp}"}
-        API.sms_send(params)
-    except (APIException, HTTPException) as e:
-        return JsonResponse({"ok": False, "error": str(e)}, status=502)
+        send_email_otp(email, otp, subject="Verification Code")
+    except Exception as e:
+        logger.exception("Email send failed")  # full traceback in console
+        return JsonResponse(
+            {"ok": False, "error": f"{e.__class__.__name__}: {e}"},
+            status=502
+        )
 
-    return JsonResponse({"ok": True, "message" : "OTP sent successfully"})
+    return JsonResponse({"ok": True, "message": "OTP sent to email"})
 @require_POST
 def verify_code(request):
-    phone = request.POST.get("phone")
-    code  = request.POST.get("code")
-    if not phone or not code:
-        return JsonResponse({"ok": False, "error": "phone & code required"}, status=400)
+    email = (request.POST.get("email") or "").strip().lower()
+    code  = (request.POST.get("code") or "").strip()
 
-    if not verify_otp(phone, PURPOSE, code):
+    if not email or not code:
+        return JsonResponse({"ok": False, "error": "email & code required"}, status=400)
+
+    if not verify_otp(email, PURPOSE, code):
         return JsonResponse({"ok": False, "error": "invalid or expired"}, status=400)
 
     try:
-        user = User.objects.get(phone=phone)
+        user = User.objects.get(email__iexact=email)
     except User.DoesNotExist:
         return JsonResponse({"ok": False, "error": "user not found"}, status=404)
 
     if not user.is_active:
-        return JsonResponse({"ok": False, "error": "user not active"}, status=404)
+        return JsonResponse({"ok": False, "error": "user not active"}, status=403)
+
+    backend = "django.contrib.auth.backends.ModelBackend"
+    login(request, user, backend=backend)
 
     if user.is_superuser:
-        return redirect("admin:index")
+        return JsonResponse({"ok": True, "redirect": reverse("admin:index")})
+    return JsonResponse({"ok": True, "redirect": reverse("dashboard")})
 
-    return redirect(reverse("dashboard"))
 # <--- Profile Redirect --->
 @login_required
 def me_redirect(request):
