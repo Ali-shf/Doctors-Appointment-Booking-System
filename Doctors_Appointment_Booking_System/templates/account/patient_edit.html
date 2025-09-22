@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "account/base.html" %}
 {% block title %}Edit Patient Profile{% endblock %}
 {% block content %}
 
@@ -11,13 +11,13 @@
         {% csrf_token %}
         <fieldset class="mb-3">
           <legend class="fs-6 text-muted">Account</legend>
-          {% include "_form_fields.html" with form=user_form %}
+          {% include "account/_form_fields.html" with form=user_form %}
         </fieldset>
 
         {% if patient_form and patient_form.visible_fields %}
           <fieldset class="mb-3">
             <legend class="fs-6 text-muted">Patient</legend>
-            {% include "_form_fields.html" with form=patient_form %}
+            {% include "account/_form_fields.html" with form=patient_form %}
           </fieldset>
         {% endif %}
 
