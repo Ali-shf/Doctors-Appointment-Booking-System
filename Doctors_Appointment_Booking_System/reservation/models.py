@@ -1,6 +1,8 @@
-# Create your models here.
+
 from django.db import models
+
 from doctor.models import Clinic
+
 from account.models import Doctor,User
 
 
@@ -47,7 +49,7 @@ class Visit(models.Model):
         ordering = ['date', 'start_meet']
 
     def __str__(self):
-        return f"Visit {self.id}: Dr.{self.doctor.user.username} with {self.patient.username}"
+        return f"Visit {self.id}: Dr.{self.doctor.user.username} with {self.patient.username}" 
 
 
 

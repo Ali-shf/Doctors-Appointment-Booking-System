@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-# Register your models here.
+
 from .models import TimeSheet, Visit, EmailMessage
 
 
@@ -22,12 +22,12 @@ class VisitAdmin(admin.ModelAdmin):
 
 @admin.register(EmailMessage)
 class EmailMessageAdmin(admin.ModelAdmin):
-   
-    def short_description(self, obj):
-        return (obj.description[:40] + "...") if obj.description else ""
-    short_description.short_description = "Description"
 
-    list_display = ("visit", "short_description")
+    @admin.display(description="Description")
+    def description_preview(self, obj):
+        return (obj.description[:40] + "...") if obj.description else ""
+
+    list_display = ("visit", "description_preview")
     search_fields = (
         "visit__doctor__user__username",
         "visit__patient__username",
