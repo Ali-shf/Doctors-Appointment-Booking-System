@@ -1,7 +1,7 @@
 from django import forms
 from django.forms import inlineformset_factory, BaseInlineFormSet
 
-from doctor.models import Comment,Clinic , ClinicOpeningHour
+from doctor.models import Comment,Clinic 
 from cities_light.models import Country,Region,City
 
 
@@ -27,58 +27,6 @@ class ClinicForm(forms.ModelForm):
             "region": forms.Select(attrs={"class": "form-select"}),
             "city": forms.Select(attrs={"class": "form-select"}),
         }
-
-class OpeningHourForm(forms.ModelForm):
-    class Meta:
-        model = ClinicOpeningHour
-        fields = ["weekday", "start", "end"]
-        widgets = {
-            "weekday": forms.Select(attrs={"class": "form-select"}),
-            "start": forms.TimeInput(attrs={"type": "time", "class": "form-control"}),
-            "end": forms.TimeInput(attrs={"type": "time", "class": "form-control"}),
-        }
-
-class BaseOpeningHourFormSet(BaseInlineFormSet):
-    def clean(self):
-        super().clean()
-        slots = {choice[0]: [] for choice in ClinicOpeningHour.Weekday.choices}
-        for form in self.forms:
-            if getattr(form, "cleaned_data", None) is None:
-                continue
-            if form.cleaned_data.get("DELETE"):
-                continue
-
-            wd = form.cleaned_data.get("weekday")
-            start = form.cleaned_data.get("start")
-            end = form.cleaned_data.get("end")
-
-            if not wd or not start or not end:
-                # اجازهٔ سطر ناقص نمی‌دهیم؛ اگر می‌خواهی بدهی، این بخش را نرم‌تر کن
-                form.add_error(None, "Weekday, start and end are required.")
-                continue
-
-            if end <= start:
-                form.add_error("end", "End time must be after start time.")
-                continue
-
-            # overlap check
-            for s, e in slots.get(wd, []):
-                # اگر نه (end <= s یا start >= e) => همپوشانی دارد
-                if not (end <= s or start >= e):
-                    form.add_error(None, "Time range overlaps another range for this weekday.")
-                    break
-            else:
-                slots.setdefault(wd, []).append((start, end))
-
-OpeningHourFormSet = inlineformset_factory(
-    Clinic,
-    ClinicOpeningHour,
-    form=OpeningHourForm,
-    formset=BaseOpeningHourFormSet,
-    fields=["weekday", "start", "end"],
-    extra=1,            # می‌تونی 7 بذاری تا برای هر روز یک ردیف خالی نشان دهد
-    can_delete=True,
-)
 
 class CommentForm(forms.ModelForm):
     class Meta:

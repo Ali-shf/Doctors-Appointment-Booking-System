@@ -41,14 +41,6 @@ class Command(BaseCommand):
                 city = city_detail,
                 region = city_detail.region,
                 country = city_detail.country,
-                # working_hours={"sat": "09:00-17:00",
-                #     "sun": "09:00-17:00",
-                #     "mon": "09:00-17:00",
-                #     "tue": "09:00-17:00",
-                #     "wed": "09:00-17:00",
-                #     "thu": "09:00-17:00",
-                #     "fri": "closed",
-                # },
                 description=fake.paragraph(nb_sentences = 3)
 
             )

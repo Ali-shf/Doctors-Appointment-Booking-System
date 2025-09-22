@@ -5,16 +5,8 @@ from django.shortcuts import get_object_or_404 , redirect
 from .models import Comment, Doctor, Patient , Clinic
 from .forms import CommentForm
 from doctor.models import Clinic
-from django.db.models import Avg
 from doctor.forms import ClinicForm
-
-
-
-
-# views.py
-from django.db.models import Avg, Count, F, FloatField, ExpressionWrapper
-from django.views.generic import ListView
-from .models import Clinic
+from django.db.models import Avg, Count, F, FloatField, ExpressionWrapper , Prefetch
 
 class ClinicListView(ListView):
     model = Clinic
@@ -41,9 +33,23 @@ class ClinicListView(ListView):
         return qs
 
 
-# views.py
-from django.db.models import Avg, Count
-from django.views.generic import DetailView
+
+# class ClinicDetailView(DetailView):
+#     model = Clinic
+#     template_name = "doctor/clinic_detail.html"
+#     context_object_name = "clinic"
+
+#     def get_queryset(self):
+#         return (
+#             super()
+#             .get_queryset()
+#             .annotate(
+#                 avg_rate=Avg("comments_received__rate"),
+#                 rate_count=Count("comments_received"),
+#             )
+#             .order_by("name")
+#         )
+
 
 class ClinicDetailView(DetailView):
     model = Clinic
@@ -58,8 +64,30 @@ class ClinicDetailView(DetailView):
                 avg_rate=Avg("comments_received__rate"),
                 rate_count=Count("comments_received"),
             )
-            .order_by("name")
+            .prefetch_related(
+                Prefetch(
+                    "doctors",
+                    queryset=Doctor.objects.select_related("user").only(
+                        "id", "specialties",
+                        "user__id", "user__first_name", "user__last_name",
+                    ),
+                ),
+                Prefetch(
+                    "comments_received",
+                    queryset=Comment.objects.select_related(
+                        "patient_id", "doctor_id", "clinic_id"
+                    ).order_by("-created_at"),
+                    to_attr="prefetched_comments",  # اختیاری: دسترسی سریع در کانتکست
+                ),
+            )
         )
+    
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        # اگر ترجیح می‌دهی، alias بدهیم:
+        ctx["doctors"] = self.object.doctors.all()  # قبلاً prefetch شده
+        ctx["comments"] = self.object.comments_received.all()  # قبلاً prefetch شده
+        return ctx
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -146,24 +174,12 @@ class CommentDoctorListView(ListView):
 
 
 
-
-from django.shortcuts import get_object_or_404, redirect
-from django.urls import reverse
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import CreateView
-from .models import Comment, Clinic, Doctor, Patient   # طبق پروژه‌ات
-from .forms import CommentForm
-
-
-
-
 class add_comment_view(LoginRequiredMixin, CreateView):
     model = Comment
     form_class = CommentForm
     template_name = "doctor/comment_form.html"
 
     def dispatch(self, request, *args, **kwargs):
-        # کلینیک/دکترِ دریافتی از URL را برای initial نگه می‌داریم
         self._clinic = None
         self._doctor = None
         clinic_pk = request.GET.get("clinic") or kwargs.get("clinic_pk")
@@ -190,7 +206,6 @@ class add_comment_view(LoginRequiredMixin, CreateView):
             return self.form_invalid(form)
         form.instance.patient_id = patient
 
-        # 2) اگر کاربر فیلدهای کلینیک/دکتر را در فرم نداشت، از URL ست کن
         if self._clinic and not form.instance.clinic_id:
             form.instance.clinic_id = self._clinic
         if self._doctor and not form.instance.doctor_id:
@@ -198,7 +213,6 @@ class add_comment_view(LoginRequiredMixin, CreateView):
 
         self.object = form.save()
 
-        # 3) برگشت
         next_url = self.request.GET.get("next")
         if next_url:
             return redirect(next_url)
