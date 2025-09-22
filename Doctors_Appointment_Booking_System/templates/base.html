@@ -13,8 +13,8 @@
   {% block extra_head %}{% endblock %}
 </head>
 <body>
-  <!-- Navbar ساده -->
-  <nav class="navbar navbar-expand-lg bg-body-tertiary mb-3 border-bottom">
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg bg-body-tertiary mb-0 border-bottom">
     <div class="container">
       <a class="navbar-brand fw-semibold" href="{% url 'doctors_list' %}">Doctors</a>
       <div class="ms-auto d-flex gap-2">
@@ -28,7 +28,18 @@
     </div>
   </nav>
 
-  <main class="container">
+  <!-- Global Back bar -->
+  <div class="bg-light border-bottom">
+    <div class="container py-2">
+      <a
+        href="{% block back_href %}{% url 'doctors_list' %}{% endblock %}"
+        class="btn btn-outline-secondary btn-sm"
+        onclick="if (document.referrer && document.referrer !== window.location.href) { history.back(); return false; }"
+      >← Back</a>
+    </div>
+  </div>
+
+  <main class="container my-3">
     <!-- Django messages -->
     {% if messages %}
       <div class="mb-3">
@@ -42,7 +53,7 @@
   </main>
 
   <footer class="container py-5 text-center text-muted small">
-    {% block footer %}© {{ now|date:"Y" }}{% endblock %}
+    {% block footer %}© {% now "Y" %}{% endblock %}
   </footer>
 
   <!-- Bootstrap JS (اختیاری) -->

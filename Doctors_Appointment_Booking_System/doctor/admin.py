@@ -2,15 +2,21 @@ from django.contrib import admin
 from django.db.models import Avg,Count
 from django.utils.html import format_html
 
-from doctor.models import Comment,Clinic
+from doctor.models import Comment,Clinic,ClinicOpeningHour
 
+
+class OpeningHourInline(admin.TabularInline):
+    model = ClinicOpeningHour
+    extra = 1
 
 @admin.register(Clinic)
 class ClinicAdmin(admin.ModelAdmin):
     list_display = (
-    "name","founded_date","address","working_hours")
+    "name","founded_date","address")
+    inlines = [OpeningHourInline]
     search_fields = ("name" , "address")
     fieldsets = ((None, {"fields": ("name", "founded_date", "address", "description")}),("Working hours (JSON)", {"fields": ("working_hours",)}))
+
 
 
 

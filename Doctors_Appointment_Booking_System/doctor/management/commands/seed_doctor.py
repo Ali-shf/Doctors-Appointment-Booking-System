@@ -33,7 +33,7 @@ class Command(BaseCommand):
         
         clinics = []
         for _ in range(100):
-            city_detail = self.pick_random_city()
+            city_detail = pick_random_city()
             clinic = Clinic.objects.create(
                 name = fake.company(),
                 founded_date=fake.date_between(start_date='-20y' , end_date='today'),
@@ -41,14 +41,15 @@ class Command(BaseCommand):
                 city = city_detail,
                 region = city_detail.region,
                 country = city_detail.country,
-                working_hours={"sat": "09:00-17:00",
-                    "sun": "09:00-17:00",
-                    "mon": "09:00-17:00",
-                    "tue": "09:00-17:00",
-                    "wed": "09:00-17:00",
-                    "thu": "09:00-17:00",
-                    "fri": "closed",
-                }, description=fake.paragraph(nb_sentences = 3)
+                # working_hours={"sat": "09:00-17:00",
+                #     "sun": "09:00-17:00",
+                #     "mon": "09:00-17:00",
+                #     "tue": "09:00-17:00",
+                #     "wed": "09:00-17:00",
+                #     "thu": "09:00-17:00",
+                #     "fri": "closed",
+                # },
+                description=fake.paragraph(nb_sentences = 3)
 
             )
             clinics.append(clinic)

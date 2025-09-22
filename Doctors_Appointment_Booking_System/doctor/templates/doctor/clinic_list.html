@@ -24,7 +24,7 @@
     </div>
   </div>
 </form>
-
+{% comment %} 
 <div class="row g-3">
   {% for c in clinics %}
     <div class="col-12 col-sm-6 col-lg-4">
@@ -32,11 +32,51 @@
         <h5 class="fw-semibold">{{ c.name }}</h5>
         <div class="text-muted small mb-2">{{ c.city.name }}, {{ c.city.region.name }}</div>
         <p class="small">{{ c.address|truncatechars:80 }}</p>
-        <a href="{% url 'clinic_detail' c.pk %}" class="btn btn-outline-primary w-100 mt-auto">View Details</a>
+        <a href="{% url 'doctor:clinic_detail' c.pk %}" class="btn btn-outline-primary w-100 mt-auto">View Details</a>
       </div>
     </div>
   {% empty %}
     <div class="col-12"><div class="alert alert-info">No clinics found.</div></div>
   {% endfor %}
 </div>
-{% endblock %}
+{% endcomment %}
+{# clinic/clinic_list.html #}
+<style>
+  .stars-outer{position:relative;display:inline-block;line-height:1}
+  .stars-outer::before{content:"★★★★★";color:#e0e0e0}
+  .stars-inner{position:absolute;top:0;left:0;white-space:nowrap;overflow:hidden;width:0}
+  .stars-inner::before{content:"★★★★★";color:#ffc107}
+</style>
+
+<div class="row g-3">
+  {% for c in clinics %}
+    <div class="col-12 col-sm-6 col-lg-4">
+      <div class="card h-100 p-3">
+        <h5 class="fw-semibold d-flex justify-content-between align-items-center">
+          <span>{{ c.name }}</span>
+          <span class="badge bg-light text-dark">
+            {% if c.avg_rate %}
+              {{ c.avg_rate|floatformat:1 }} / 5
+            {% else %}—{% endif %}
+          </span>
+        </h5>
+
+        <div class="mb-2 d-flex align-items-center gap-2">
+          <div class="stars-outer">
+            <div class="stars-inner" style="width: {{ c.rating_pct|default_if_none:0 }}%"></div>
+          </div>
+          <small class="text-muted">
+            {% if c.ratings_count %}({{ c.ratings_count }}){% else %}(there isnt any rate){% endif %}
+          </small>
+        </div>
+
+        <div class="text-muted small mb-2">{{ c.city.name }}, {{ c.city.region.name }}</div>
+        <p class="small">{{ c.address|truncatechars:80 }}</p>
+        <a href="{% url 'doctor:clinic_detail' c.pk %}" class="btn btn-outline-primary w-100 mt-auto">View Details</a>
+      </div>
+    </div>
+  {% empty %}
+    <div class="col-12"><div class="alert alert-info">No clinics found.</div></div>
+  {% endfor %}
+</div>
+{% endblock %} 

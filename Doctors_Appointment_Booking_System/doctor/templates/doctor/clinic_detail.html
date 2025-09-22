@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Clinic – {{ clinic.name }}{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+
+  <!-- Header -->
+  {% comment %} <div class="d-flex align-items-center justify-content-between mb-3">
+    <h2 class="mb-0">{{ clinic.name }}</h2>
+    <div>
+      {% if clinic.is_open %}
+        <span class="badge text-bg-success">Open now</span>
+      {% else %}
+        <span class="badge text-bg-secondary">Closed</span>
+      {% endif %}
+    </div>
+  </div> {% endcomment %}
+
+  <!-- Header -->
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <h2 class="mb-0">{{ clinic.name }}</h2>
+  <div class="d-flex align-items-center gap-2">
+    {% if clinic.rate_count %}
+      <span class="badge text-bg-warning">
+        ★ {{ clinic.avg_rate|floatformat:1 }}/5
+        <span class="text-muted">({{ clinic.rate_count }})</span>
+      </span>
+    {% else %}
+      <span class="badge text-bg-secondary">No ratings</span>
+    {% endif %}
+
+    {# وضعیت باز/بسته #}
+    {% comment %} {% if clinic.is_open %}
+      <span class="badge text-bg-success">Open now</span>
+    {% else %}
+      <span class="badge text-bg-secondary">Closed</span>
+    {% endif %} {% endcomment %}
+  </div>
+</div>
+
+
+  <div class="row g-3">
+    <div class="col-12 col-lg-8">
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="mb-3">Details</h5>
+
+          <dl class="row mb-0">
+            <dt class="col-sm-3">Founded date</dt>
+            <dd class="col-sm-9">
+              {% if clinic.founded_date %}
+                {{ clinic.founded_date|date:"Y-m-d" }}
+              {% else %}—{% endif %}
+            </dd>
+
+            <dt class="col-sm-3">Address</dt>
+            <dd class="col-sm-9">{{ clinic.address|default:"—" }}</dd>
+
+            <dt class="col-sm-3">Location</dt>
+            <dd class="col-sm-9">
+              {{ clinic.country.name|default:"—" }}
+              {% if clinic.region %} / {{ clinic.region.name }}{% endif %}
+              {% if clinic.city %} / {{ clinic.city.name }}{% endif %}
+            </dd>
+
+            <dt class="col-sm-3">Description</dt>
+            <dd class="col-sm-9">{{ clinic.description|default:"—" }}</dd>
+          </dl>
+        </div>
+      </div>
+
+      <!-- Comments -->
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <h5 class="mb-0">Comments</h5>
+            {# doctor/templates/doctor/clinic_detail.html #}
+            <a class="btn btn-sm btn-primary"
+            href="{% url 'doctor:comment_create' %}?clinic={{ clinic.pk }}&next={% url 'doctor:clinic_detail' clinic.pk %}">
+           Leave a comment
+         </a>
+         
+          </div>
+
+          {% with comments=clinic.comments_received.all %}
+            {% if comments %}
+              <ul class="list-group list-group-flush">
+                {% for c in comments %}
+                  <li class="list-group-item">
+                    <div class="d-flex justify-content-between align-items-start">
+                      <div>
+                        <div class="fw-semibold">
+                          {{ c.patient_id }} 
+                          <span class="text-muted small">rated {{ c.rate }}/5</span>
+                        </div>
+                        <div class="text-muted small">
+                          {% if c.created_at %}{{ c.created_at|date:"Y-m-d H:i" }}{% endif %}
+                        </div>
+                      </div>
+                    </div>
+                    <p class="mb-0 mt-2">{{ c.comment|linebreaksbr }}</p>
+                    <a class="small d-inline-block mt-2" href="{% url 'doctor:detail' c.pk %}">View</a>
+                    <a class="small d-inline-block mt-2" href="{% url 'doctor:comment_update' c.pk %}">Edit</a>
+                  </li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <div class="text-muted">No comments yet.</div>
+            {% endif %}
+          {% endwith %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: opening hours & actions -->
+    <div class="col-12 col-lg-4">
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="mb-3">Opening hours</h5>
+
+          {% if clinic.opening_hours.all %}
+            {% regroup clinic.opening_hours.all|dictsort:"weekday" by weekday as hours_by_day %}
+            <ul class="list-group list-group-flush">
+              {% for day in hours_by_day %}
+                <li class="list-group-item">
+                  {% with first=day.list.0 %}
+                    <div class="fw-semibold mb-1">
+                      {{ first.get_weekday_display }}
+                    </div>
+                  {% endwith %}
+                  {% for slot in day.list %}
+                    <div class="small">{{ slot.start }} – {{ slot.end }}</div>
+                  {% empty %}
+                    <div class="text-muted small">Closed</div>
+                  {% endfor %}
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <div class="text-muted">No opening hours set.</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="d-grid gap-2">
+        <a class="btn btn-outline-secondary" href="{% url 'doctor:clinics_list' %}">← Back to clinics</a>
+        {% if perms.doctor.change_clinic %}
+          <a class="btn btn-primary" href="{% url 'doctor:clinic_update' clinic.pk %}">Edit clinic</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
