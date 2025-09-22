@@ -139,4 +139,4 @@ def top_up_page(request):
 
 @login_required
 def transactions_page(request):
-    return render(request, 'wallet/transactions.hjtml')
+    return render(request, 'wallet/transactions.html')

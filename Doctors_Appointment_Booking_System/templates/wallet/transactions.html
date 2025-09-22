@@ -1,4 +1,4 @@
-% extends 'base_generic.html' %}
+{% extends 'base_generic.html' %}
 <div class="col-lg-8">
 <div class="card p-4">
 <h4 class="mb-3">Transactions</h4>
@@ -58,5 +58,4 @@ pager.querySelectorAll('a[data-page]').forEach(a=>a.addEventListener('click', (e
 document.getElementById('apply').addEventListener('click', ()=>{ page = 1; load(); });
 load();
 </script>
-{% endblock %}
 {% endblock %}

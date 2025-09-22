@@ -1,48 +1,56 @@
-<!doctype html>
+{% load static %}
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>{% block title %}Clinic App{% endblock %}</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-{% block head %}{% endblock %}
-<style>
-body { background: #f7f9fc; }
-.card { border: 0; box-shadow: 0 6px 24px rgba(0,0,0,.06); }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}My Django Project{% endblock %}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
 <body>
-<nav class="navbar navbar-expand-lg bg-white border-bottom shadow-sm">
-<div class="container">
-<a class="navbar-brand fw-bold" href="/">🏥 Clinic</a>
-<button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#nav">
-<span class="navbar-toggler-icon"></span>
-</button>
-<div id="nav" class="collapse navbar-collapse">
-<ul class="navbar-nav me-auto">
-{% if request.user.is_authenticated and request.user.doctor_profile %}
-<li class="nav-item"><a class="nav-link" href="{% url 'doctor_profile' %}">My Doctor Profile</a></li>
-{% elif request.user.is_authenticated and request.user.patient_profile %}
-<li class="nav-item"><a class="nav-link" href="{% url 'patient_profile' %}">My Patient Profile</a></li>
-{% endif %}
-</ul>
-<ul class="navbar-nav ms-auto">
-{% if request.user.is_authenticated %}
-<li class="nav-item me-2"><a class="btn btn-outline-secondary" href="{% url 'password_change' %}">Change Password</a></li>
-<li class="nav-item">
-<form method="post" action="{% url 'logout' %}">{% csrf_token %}
-<button class="btn btn-danger">Logout</button>
-</form>
-</li>
-{% else %}
-<li class="nav-item"><a class="btn btn-primary" href="{% url 'login' %}">Login</a></li>
-{% endif %}
-</ul>
-</div>
-</div>
-</nav>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="{% url 'wallet:index' %}">My Project</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          {% if user.is_authenticated %}
+            <li class="nav-item"><a class="nav-link" href="{% url 'logout' %}">Logout</a></li>
+          {% else %}
+            <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Login</a></li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+  </nav>
 
+  <!-- Messages -->
+  <div class="container mt-3">
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
+  </div>
 
-{% if messages %}
-<div class="container mt-3">
+  <!-- Page content -->
+  <main class="container my-4">
+    {% block content %}
+    <!-- Page-specific content will go here -->
+    {% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-dark text-light text-center py-3 mt-auto">
+    <p class="mb-0">&copy; {{ year|default:2025 }} My Django Project</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
 </html>
