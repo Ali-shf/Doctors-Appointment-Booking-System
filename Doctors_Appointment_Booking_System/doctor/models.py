@@ -20,26 +20,26 @@ class Clinic(models.Model):
     city = models.ForeignKey(
         City, on_delete=models.SET_NULL, null=True, blank=True, related_name="clinics"
     )
-    # doctors = models.ManyToManyField(
-    #     Doctor,
-    #     through="ClinicDoctor",
-    #     related_name="clinics",
-    # )
+    doctors = models.ManyToManyField(
+        Doctor,
+        through="ClinicDoctor",
+        related_name="clinics",
+    )
 
 
-# class ClinicDoctor(models.Model):
-#     clinic = models.ForeignKey(Clinic, on_delete=models.CASCADE, related_name="clinic_doctors")
-#     doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, related_name="doctor_links")
+class ClinicDoctor(models.Model):
+    clinic = models.ForeignKey(Clinic, on_delete=models.CASCADE, related_name="clinic_doctors")
+    doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, related_name="doctor_links")
 
-#     class Meta:
-#         db_table = "clinic_doctors" 
-#         unique_together = [("clinic", "doctor")]
+    class Meta:
+        db_table = "clinic_doctors" 
+        unique_together = [("clinic", "doctor")]
 
-#     def __str__(self):
-#         return self.name
+    def __str__(self):
+        return self.name
     
-#     def get_absolute_url(self):
-#         return reverse("doctor:clinic_detail", kwargs={"pk": self.pk})
+    def get_absolute_url(self):
+        return reverse("doctor:clinic_detail", kwargs={"pk": self.pk})
     
 
 

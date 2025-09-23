@@ -70,7 +70,6 @@ class ClinicListView(ListView):
 
         return qs
 
-    # اگر بخواهی per_page داینامیک باشد (مثلاً ?per_page=50)
     def get_paginate_by(self, queryset):
         per_page = self.request.GET.get("per_page")
         if per_page and per_page.isdigit():
@@ -80,12 +79,10 @@ class ClinicListView(ListView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
 
-        # برای حفظ فیلترها در لینک‌های صفحه‌بندی
         qd = self.request.GET.copy()
         qd.pop("page", None)
         ctx["querystring"] = qd.urlencode()
 
-        # محدوده‌ی شماره صفحات (۵تایی حول صفحه فعلی)
         if ctx.get("is_paginated"):
             current = ctx["page_obj"].number
             last = ctx["paginator"].num_pages
@@ -95,7 +92,6 @@ class ClinicListView(ListView):
         else:
             ctx["page_range"] = []
 
-        # برگرداندن مقادیر فیلتر برای پر کردن فرم
         ctx["q"] = self.request.GET.get("q", "")
         ctx["founded_after"] = self.request.GET.get("founded_after", "")
         ctx["per_page"] = self.request.GET.get("per_page", self.paginate_by)
