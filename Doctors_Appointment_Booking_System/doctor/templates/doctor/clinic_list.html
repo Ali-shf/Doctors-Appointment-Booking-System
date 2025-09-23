@@ -24,23 +24,6 @@
     </div>
   </div>
 </form>
-{% comment %} 
-<div class="row g-3">
-  {% for c in clinics %}
-    <div class="col-12 col-sm-6 col-lg-4">
-      <div class="card h-100 p-3">
-        <h5 class="fw-semibold">{{ c.name }}</h5>
-        <div class="text-muted small mb-2">{{ c.city.name }}, {{ c.city.region.name }}</div>
-        <p class="small">{{ c.address|truncatechars:80 }}</p>
-        <a href="{% url 'doctor:clinic_detail' c.pk %}" class="btn btn-outline-primary w-100 mt-auto">View Details</a>
-      </div>
-    </div>
-  {% empty %}
-    <div class="col-12"><div class="alert alert-info">No clinics found.</div></div>
-  {% endfor %}
-</div>
-{% endcomment %}
-{# clinic/clinic_list.html #}
 <style>
   .stars-outer{position:relative;display:inline-block;line-height:1}
   .stars-outer::before{content:"★★★★★";color:#e0e0e0}
@@ -79,4 +62,43 @@
     <div class="col-12"><div class="alert alert-info">No clinics found.</div></div>
   {% endfor %}
 </div>
+
+{% if is_paginated %}
+<nav aria-label="Clinics pagination" class="mt-3">
+  <ul class="pagination justify-content-center">
+
+    {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.previous_page_number }}">Previous</a>
+      </li>
+    {% else %}
+      <li class="page-item disabled"><span class="page-link">Previous</span></li>
+    {% endif %}
+
+    {# شماره صفحات اطراف صفحه فعلی #}
+    {% for num in page_range %}
+      {% if num == page_obj.number %}
+        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+      {% else %}
+        <li class="page-item">
+          <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ num }}">{{ num }}</a>
+        </li>
+      {% endif %}
+    {% endfor %}
+
+    {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.next_page_number }}">Next</a>
+      </li>
+    {% else %}
+      <li class="page-item disabled"><span class="page-link">Next</span></li>
+    {% endif %}
+
+  </ul>
+  <p class="text-center text-muted small mb-0">
+    Page {{ page_obj.number }} of {{ paginator.num_pages }} — {{ paginator.count }} results
+  </p>
+</nav>
+{% endif %}
+
 {% endblock %} 

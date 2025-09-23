@@ -8,6 +8,35 @@ from doctor.models import Clinic
 from doctor.forms import ClinicForm
 from django.db.models import Avg, Count, F, FloatField, ExpressionWrapper , Prefetch
 
+# class ClinicListView(ListView):
+#     model = Clinic
+#     paginate_by = 20
+#     template_name = "clinic/clinic_list.html"
+#     context_object_name = "clinics"
+
+#     def get_queryset(self):
+#         qs = (
+#             super()
+#             .get_queryset()
+#             .select_related("city", "city__region")  # جلوگیری از N+1
+#             .annotate(
+#                 avg_rate=Avg("comments_received__rate"),
+#                 ratings_count=Count("comments_received__rate"),
+#             )
+#             .annotate( 
+#                 rating_pct=ExpressionWrapper(
+#                     100.0 * F("avg_rate") / 5.0, output_field=FloatField()
+#                 )
+#             )
+#             .order_by("name")
+#         )
+#         return qs
+
+
+# views.py
+from django.db.models import Avg, Count, F, FloatField, ExpressionWrapper, Q
+from django.views.generic import ListView
+
 class ClinicListView(ListView):
     model = Clinic
     paginate_by = 20
@@ -18,19 +47,60 @@ class ClinicListView(ListView):
         qs = (
             super()
             .get_queryset()
-            .select_related("city", "city__region")  # جلوگیری از N+1
+            .select_related("city", "city__region")
             .annotate(
                 avg_rate=Avg("comments_received__rate"),
                 ratings_count=Count("comments_received__rate"),
-            )
-            .annotate( 
-                rating_pct=ExpressionWrapper(
-                    100.0 * F("avg_rate") / 5.0, output_field=FloatField()
-                )
+                rating_pct=ExpressionWrapper(100.0 * F("avg_rate") / 5.0, output_field=FloatField()),
             )
             .order_by("name")
         )
+
+        # فیلترها (اختیاری – بر اساس تمپلیت خودت)
+        q = (self.request.GET.get("q") or "").strip()
+        if q:
+            qs = qs.filter(
+                Q(name__icontains=q) |
+                Q(city__name__icontains=q) |
+                Q(address__icontains=q)
+            )
+        founded_after = (self.request.GET.get("founded_after") or "").strip()
+        if founded_after:
+            qs = qs.filter(founded_date__gte=founded_after)
+
         return qs
+
+    # اگر بخواهی per_page داینامیک باشد (مثلاً ?per_page=50)
+    def get_paginate_by(self, queryset):
+        per_page = self.request.GET.get("per_page")
+        if per_page and per_page.isdigit():
+            return max(1, min(int(per_page), 100))  # سقف ۱۰۰
+        return self.paginate_by
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+
+        # برای حفظ فیلترها در لینک‌های صفحه‌بندی
+        qd = self.request.GET.copy()
+        qd.pop("page", None)
+        ctx["querystring"] = qd.urlencode()
+
+        # محدوده‌ی شماره صفحات (۵تایی حول صفحه فعلی)
+        if ctx.get("is_paginated"):
+            current = ctx["page_obj"].number
+            last = ctx["paginator"].num_pages
+            start = max(current - 2, 1)
+            end = min(current + 2, last)
+            ctx["page_range"] = list(range(start, end + 1))
+        else:
+            ctx["page_range"] = []
+
+        # برگرداندن مقادیر فیلتر برای پر کردن فرم
+        ctx["q"] = self.request.GET.get("q", "")
+        ctx["founded_after"] = self.request.GET.get("founded_after", "")
+        ctx["per_page"] = self.request.GET.get("per_page", self.paginate_by)
+
+        return ctx
 
 
 
@@ -65,13 +135,13 @@ class ClinicDetailView(DetailView):
                 rate_count=Count("comments_received"),
             )
             .prefetch_related(
-                Prefetch(
-                    "doctors",
-                    queryset=Doctor.objects.select_related("user").only(
-                        "id", "specialties",
-                        "user__id", "user__first_name", "user__last_name",
-                    ),
-                ),
+                # Prefetch(
+                #     "doctors",
+                #     queryset=Doctor.objects.select_related("user").only(
+                #         "id", "specialties",
+                #         "user__id", "user__first_name", "user__last_name",
+                #     ),
+                # ),
                 Prefetch(
                     "comments_received",
                     queryset=Comment.objects.select_related(
@@ -235,23 +305,52 @@ class detail_comment_view(DetailView):
 
 
 
+# class edit_comment_view(LoginRequiredMixin, UpdateView):
+#     model = Comment
+#     form_class = CommentForm
+#     template_name = "doctor/comment_form.html"
+
+#     def get_success_url(self):
+#         next_url = self.request.GET.get("next")
+#         if next_url:
+#             return next_url
+#         return reverse("doctor:detail", args=[self.object.pk])
+
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+
 class edit_comment_view(LoginRequiredMixin, UpdateView):
     model = Comment
     form_class = CommentForm
     template_name = "doctor/comment_form.html"
 
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related("patient_id__user")
+            .filter(patient_id__user=self.request.user)
+        )
+
     def get_success_url(self):
         next_url = self.request.GET.get("next")
         if next_url:
             return next_url
-        return reverse("doctor:detail", args=[self.object.pk])
+        if self.object.clinic_id_id:
+            return reverse("doctor:clinic_detail", args=[self.object.clinic_id_id])
+        if self.object.doctor_id_id:
+            return reverse("doctor:doctor_public_detail", args=[self.object.doctor_id_id])
+        return reverse("doctor:doctors_list")
 
 
 
 class delete_comment_view(LoginRequiredMixin, DeleteView):
     model = Comment
+    context_object_name = "comment"
     template_name = "doctor/comment_confirm_delete.html"
-    success_url = reverse_lazy("comment:list")
+    success_url = reverse_lazy("doctor:clinics_list")
+    def get_queryset(self):
+        return super().get_queryset().filter(patient_id__user=self.request.user)
+
 
 
 class clinic_rating_summary_view():

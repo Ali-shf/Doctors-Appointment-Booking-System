@@ -8,7 +8,7 @@ urlpatterns = [
     path("comment/<int:pk>/", views.detail_comment_view.as_view(), name="detail"),
     path("comment/new/", views.add_comment_view.as_view(), name="comment_create"),
     path("comment/<int:pk>/edit/", views.edit_comment_view.as_view(), name="comment_update"),
-    path("comment/<int:pk>/delete/", views.delete_comment_view.as_view(), name="delete"),
+    path("comment/<int:pk>/delete/", views.delete_comment_view.as_view(), name="comment_delete"),
 
     path("clinics/", views.ClinicListView.as_view(), name="clinics_list"),#OK
     path("clinics/<int:pk>/", views.ClinicDetailView.as_view(), name="clinic_detail"),

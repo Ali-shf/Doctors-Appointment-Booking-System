@@ -80,7 +80,14 @@
                     </div>
                     <p class="mb-0 mt-2">{{ c.comment|linebreaksbr }}</p>
                     <a class="small d-inline-block mt-2" href="{% url 'doctor:detail' c.pk %}">View</a>
-                    <a class="small d-inline-block mt-2" href="{% url 'doctor:comment_update' c.pk %}">Edit</a>
+                    {% if user.is_authenticated and c.patient_id.user_id == user.id %}
+                      <a class="small d-inline-block mt-2" href="{% url 'doctor:comment_update' c.pk %}">Edit</a>
+                      {% comment %} <a class="small d-inline-block mt-2" href="{% url 'doctor:comment_delete' c.pk %}">Delete</a> {% endcomment %}
+                      <a href="{% url 'doctor:comment_delete' c.pk %}?next={% url 'doctor:clinic_detail' clinic.pk %}">Delete</a>
+
+                    {% endif %}
+
+                    {% comment %} <a class="small d-inline-block mt-2" href="{% url 'doctor:comment_update' c.pk %}">Edit</a> {% endcomment %}
                   </li>
                 {% endfor %}
               </ul>
@@ -95,7 +102,7 @@
 
     
     <!-- Right: opening hours & actions -->
-    <div class="col-12 col-lg-4">
+    {% comment %} <div class="col-12 col-lg-4">
       <div class="card mb-3">
         <div class="card-body">
           <h5 class="mb-3">Doctors</h5>
@@ -120,7 +127,7 @@
           {% endif %}
         </div>
       </div>
-    </div>
+    </div> {% endcomment %}
 
   </div>
 </div>
