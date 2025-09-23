@@ -53,18 +53,18 @@ class Comment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     rate = models.IntegerField(validators=[MinValueValidator(0) , MaxValueValidator(5)])
 
-def __str__(self):
-    if self.doctor_id and self.clinik_id:
-        return f"{self.patient_id} | {self.doctor_id} |  {self.clinic_id} ({self.rate})"
-    
-    elif self.doctor_id :
-        return f"{self.patient_id} | {self.doctor_id} |  'no clinic' ({self.rate})"
-    else:
-        return f"{self.patient_id} | 'no doctor' |  {self.clinic_id} ({self.rate})"
-    
+    def __str__(self):
+        if self.doctor_id and self.clinic_id:
+            return f"{self.patient_id} | {self.doctor_id} |  {self.clinic_id} ({self.rate})"
+        
+        elif self.doctor_id :
+            return f"{self.patient_id} | {self.doctor_id} |  'no clinic' ({self.rate})"
+        else:
+            return f"{self.patient_id} | 'no doctor' |  {self.clinic_id} ({self.rate})"
+        
 
-def get_absolute_url(self):
-    return reverse("doctor:comment_detail", args=[self.pk])
+    def get_absolute_url(self):
+        return reverse("doctor:comment_detail", args=[self.pk])
 
 
 
