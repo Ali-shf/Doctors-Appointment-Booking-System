@@ -1,0 +1,9 @@
+services:
+  web:
+    build: .
+    volumes:
+      - ./:/usr/src/app/
+    ports:
+      - "82:8000"
+    env_file:
+      - ./.env.dev
