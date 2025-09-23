@@ -1,8 +1,8 @@
 from django.urls import path
 from .views import (
     TimeSheetListView, TimeSheetCreateView, TimeSheetUpdateView, TimeSheetDeleteView,
-    VisitListView, VisitCreateView,
-    EmailMessageListView, EmailMessageCreateView
+    VisitListView, VisitCreateView, VisitUpdateView, VisitDeleteView,
+    EmailMessageListView, EmailMessageCreateView, EmailMessageUpdateView, EmailMessageDeleteView
 )
 
 app_name = "reservation"
@@ -17,8 +17,12 @@ urlpatterns = [
     # Visit
     path("visits/", VisitListView.as_view(), name="visit-list"),
     path("visits/add/", VisitCreateView.as_view(), name="visit-add"),
+    path("visits/<int:pk>/edit/", VisitUpdateView.as_view(), name="visit-edit"),
+    path("visits/<int:pk>/delete/", VisitDeleteView.as_view(), name="visit-delete"),
 
     # EmailMessage
     path("emails/", EmailMessageListView.as_view(), name="emailmessage-list"),
     path("emails/add/", EmailMessageCreateView.as_view(), name="emailmessage-add"),
+    path("emails/<int:pk>/edit/", EmailMessageUpdateView.as_view(), name="emailmessage-edit"),
+    path("emails/<int:pk>/delete/", EmailMessageDeleteView.as_view(), name="emailmessage-delete"),
 ]

@@ -1,0 +1,60 @@
+{% extends "reservation/base.html" %}
+
+{% block title %}{% if object %}Edit{% else %}Send{% endif %} Email Message - Reservation System{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8 col-xl-6">
+    <div class="card shadow border-0 rounded-4">
+      <div class="card-body p-4 p-md-5">
+        <h1 class="h4 text-center mb-4">
+          {% if object %}Edit Email Message{% else %}Send Email Message{% endif %}
+        </h1>
+
+        {% if messages %}
+          <div class="mb-3">
+            {% for message in messages %}
+              <div class="alert alert-{{ message.tags }} mb-2">{{ message }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        <form method="post" novalidate>
+          {% csrf_token %}
+          
+          <div class="mb-3">
+            <label class="form-label" for="{{ form.visit.id_for_label }}">Visit</label>
+            {{ form.visit }}
+            <div class="form-text">Select the visit this message is related to</div>
+            {% for err in form.visit.errors %}
+              <div class="text-danger small">{{ err }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="{{ form.description.id_for_label }}">Message Description</label>
+            {{ form.description }}
+            <div class="form-text">Enter your message details here</div>
+            {% for err in form.description.errors %}
+              <div class="text-danger small">{{ err }}</div>
+            {% endfor %}
+          </div>
+
+          {% if form.non_field_errors %}
+            <div class="text-danger small mb-3">
+              {{ form.non_field_errors }}
+            </div>
+          {% endif %}
+
+          <div class="d-flex gap-2">
+            <button class="btn btn-primary flex-fill" type="submit">
+              {% if object %}Update Message{% else %}Send Message{% endif %}
+            </button>
+            <a href="{% url 'reservation:emailmessage-list' %}" class="btn btn-outline-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

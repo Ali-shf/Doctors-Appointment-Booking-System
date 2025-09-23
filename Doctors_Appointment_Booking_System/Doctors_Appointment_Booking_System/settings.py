@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "widget_tweaks",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -39,8 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     "cities_light",
     "account.apps.AccountConfig",
-    'doctor',
     'reservation',
+    'doctor',
     'wallet',
     "allauth", "allauth.account", "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
@@ -49,6 +50,10 @@ INSTALLED_APPS = [
 
 AUTH_USER_MODEL = "user_account.User"
 
+
+CITIES_LIGHT_INCLUDE_COUNTRIES = ['IR','GB','US']
+
+CITIES_LIGHT_TRANSLATION_LANGUAGES = ['en']
 
 SITE_ID = 1
 AUTHENTICATION_BACKENDS = [
