@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block title %}Clinics Directory{% endblock %}
+{% block content %}
+<form class="mb-4">
+  <div class="row g-3 align-items-stretch">
+    <div class="col-12 col-lg-8">
+      <div class="card h-100 p-3">
+        <label class="form-label">Search</label>
+        <input name="q" value="{{ q }}" class="form-control"
+               placeholder="Name, city, address...">
+      </div>
+    </div>
+    <div class="col-12 col-lg-4">
+      <div class="card h-100 p-3">
+        <label class="form-label">Founded After</label>
+        <input type="date" name="founded_after" value="{{ founded_after }}" class="form-control">
+      </div>
+    </div>
+    <div class="col-12">
+      <div class="d-flex gap-2 justify-content-end">
+        <button class="btn btn-primary">Apply</button>
+        <a href="{% url 'doctor:clinics_list' %}" class="btn btn-outline-secondary">Reset</a>
+      </div>
+    </div>
+  </div>
+</form>
+<style>
+  .stars-outer{position:relative;display:inline-block;line-height:1}
+  .stars-outer::before{content:"★★★★★";color:#e0e0e0}
+  .stars-inner{position:absolute;top:0;left:0;white-space:nowrap;overflow:hidden;width:0}
+  .stars-inner::before{content:"★★★★★";color:#ffc107}
+</style>
+
+<div class="row g-3">
+  {% for c in clinics %}
+    <div class="col-12 col-sm-6 col-lg-4">
+      <div class="card h-100 p-3">
+        <h5 class="fw-semibold d-flex justify-content-between align-items-center">
+          <span>{{ c.name }}</span>
+          <span class="badge bg-light text-dark">
+            {% if c.avg_rate %}
+              {{ c.avg_rate|floatformat:1 }} / 5
+            {% else %}—{% endif %}
+          </span>
+        </h5>
+
+        <div class="mb-2 d-flex align-items-center gap-2">
+          <div class="stars-outer">
+            <div class="stars-inner" style="width: {{ c.rating_pct|default_if_none:0 }}%"></div>
+          </div>
+          <small class="text-muted">
+            {% if c.ratings_count %}({{ c.ratings_count }}){% else %}(there isnt any rate){% endif %}
+          </small>
+        </div>
+
+        <div class="text-muted small mb-2">{{ c.city.name }}, {{ c.city.region.name }}</div>
+        <p class="small">{{ c.address|truncatechars:80 }}</p>
+        <a href="{% url 'doctor:clinic_detail' c.pk %}" class="btn btn-outline-primary w-100 mt-auto">View Details</a>
+      </div>
+    </div>
+  {% empty %}
+    <div class="col-12"><div class="alert alert-info">No clinics found.</div></div>
+  {% endfor %}
+</div>
+
+{% if is_paginated %}
+<nav aria-label="Clinics pagination" class="mt-3">
+  <ul class="pagination justify-content-center">
+
+    {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.previous_page_number }}">Previous</a>
+      </li>
+    {% else %}
+      <li class="page-item disabled"><span class="page-link">Previous</span></li>
+    {% endif %}
+
+    {# شماره صفحات اطراف صفحه فعلی #}
+    {% for num in page_range %}
+      {% if num == page_obj.number %}
+        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+      {% else %}
+        <li class="page-item">
+          <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ num }}">{{ num }}</a>
+        </li>
+      {% endif %}
+    {% endfor %}
+
+    {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.next_page_number }}">Next</a>
+      </li>
+    {% else %}
+      <li class="page-item disabled"><span class="page-link">Next</span></li>
+    {% endif %}
+
+  </ul>
+  <p class="text-center text-muted small mb-0">
+    Page {{ page_obj.number }} of {{ paginator.num_pages }} — {{ paginator.count }} results
+  </p>
+</nav>
+{% endif %}
+
+{% endblock %} 
