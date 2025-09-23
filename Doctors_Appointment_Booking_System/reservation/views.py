@@ -1,6 +1,6 @@
 from django.shortcuts import render
 
-# Create your views here.
+
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import (
     ListView, CreateView, UpdateView, DeleteView
@@ -70,6 +70,19 @@ class VisitCreateView(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy("reservation:visit-list")
 
 
+class VisitUpdateView(LoginRequiredMixin, UpdateView):
+    model = Visit
+    form_class = VisitForm
+    template_name = "reservation/visit_form.html"
+    success_url = reverse_lazy("reservation:visit-list")
+
+
+class VisitDeleteView(LoginRequiredMixin, DeleteView):
+    model = Visit
+    template_name = "reservation/visit_confirm_delete.html"
+    success_url = reverse_lazy("reservation:visit-list")
+
+
 
 class EmailMessageListView(LoginRequiredMixin, ListView):
     model = EmailMessage
@@ -86,4 +99,17 @@ class EmailMessageCreateView(LoginRequiredMixin, CreateView):
     model = EmailMessage
     form_class = EmailMessageForm
     template_name = "reservation/emailmessage_form.html"
+    success_url = reverse_lazy("reservation:emailmessage-list")
+
+
+class EmailMessageUpdateView(LoginRequiredMixin, UpdateView):
+    model = EmailMessage
+    form_class = EmailMessageForm
+    template_name = "reservation/emailmessage_form.html"
+    success_url = reverse_lazy("reservation:emailmessage-list")
+
+
+class EmailMessageDeleteView(LoginRequiredMixin, DeleteView):
+    model = EmailMessage
+    template_name = "reservation/emailmessage_confirm_delete.html"
     success_url = reverse_lazy("reservation:emailmessage-list")

@@ -1,0 +1,34 @@
+{% extends 'base_generic.html' %}
+{% block title %}Wallet - Dashboard{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+<div class="col-lg-6">
+<div class="card p-4">
+<h4 class="mb-3">Wallet Dashboard</h4>
+<div id="balance-box" class="mb-3">
+<div class="small text-muted">Balance</div>
+<div class="fs-3 fw-bold" id="balance">—</div>
+</div>
+
+
+<div class="d-flex gap-2">
+<a href="{% url 'wallet:top_up_page' %}" class="btn btn-primary">Top up</a>
+<a href="{% url 'wallet:transactions_page' %}" class="btn btn-outline-secondary">Transactions</a>
+</div>
+</div>
+</div>
+</div>
+
+
+{% block scripts %}
+<script>
+async function fetchBalance(){
+const res = await fetch('{% url "wallet:balance" %}');
+if (!res.ok) return;
+const data = await res.json();
+document.getElementById('balance').textContent = data.balance;
+}
+fetchBalance();
+</script>
+{% endblock %}
+{% endblock %}
