@@ -47,9 +47,22 @@
 
                 <button class="btn btn-primary w-100" type="submit">Sign in</button>
 
-                {% load socialaccount %}
-                <a href="{% provider_login_url 'google' process='login' %}">Sign in with Google</a>
+            {#{% load socialaccount %}#}
+                {#<a href="{% provider_login_url 'google' process='login' %}">Sign in with Google</a>#}
 
+<<<<<<< HEAD:Doctors_Appointment_Booking_System/account/templates/login.html
+                {% load socialaccount %}
+                {% get_providers as socialaccount_providers %}
+                <ul>#}
+                  {% for provider in socialaccount_providers %}
+                    {% if provider.social_app %} {# only true if SocialApp is configured for current Site 
+                      <li><a href="{% provider_login_url provider.id process='login' %}">
+                        Sign in with {{ provider.name }}
+                      </a></li>
+                    {% endif %}
+                  {% endfor %}
+                </ul>
+=======
 {#                {% load socialaccount %}#}
 {#                {% get_providers as socialaccount_providers %}#}
 {#                <ul>#}
@@ -61,6 +74,7 @@
 {#                    {% endif %}#}
 {#                  {% endfor %}#}
 {#                </ul>#}
+>>>>>>> dev-v01:Doctors_Appointment_Booking_System/templates/account/login.html
 
               </form>
 
