@@ -136,6 +136,8 @@ celerybeat.pid
 
 # Environments
 .env
+.env.dev
+.env.prod
 .envrc
 .venv
 env/
@@ -206,5 +208,16 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 
+
+# Docker
+*.swp
+docker-compose.override.yml
+# Note: keep docker-compose.yml and docker-compose.prod.yml tracked
+Dockerfile*
+docker-compose*.yml
+
+# Environment files
+.env.prod
+.env.dev
 
 
