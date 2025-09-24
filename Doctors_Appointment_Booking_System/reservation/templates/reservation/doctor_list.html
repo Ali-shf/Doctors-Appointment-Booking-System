@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}لیست پزشکان{% endblock %}
+
+{% block content %}
+{% block head %}
+<style>
+  .hero {
+    background: linear-gradient(135deg, #f0f7ff 0%, #fff 100%);
+    border-radius: 16px;
+    padding: 20px 24px;
+    border: 1px solid #e7eef7;
+  }
+  .doctor-card {
+    transition: transform .15s ease, box-shadow .15s ease;
+    border-radius: 14px;
+  }
+  .doctor-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(0,0,0,.08);
+  }
+  .avatar {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: radial-gradient( circle at 30% 30%, rgba(13,110,253,.25), rgba(13,110,253,.05) 70% );
+  }
+  .chip {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: #f3f6fb;
+    color: #5b6b7b;
+    font-size: 12px;
+    border: 1px solid #e9eff6;
+  }
+  .btn-primary {
+    box-shadow: 0 6px 16px rgba(13,110,253,.2);
+  }
+</style>
+{% endblock %}
+<div class="container my-4">
+  <div class="hero d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <h4 class="mb-1 fw-bold">پزشکان</h4>
+      <div class="text-muted small">یکی را انتخاب کنید تا زمان‌های خالی را ببینید</div>
+    </div>
+    <a class="btn btn-outline-secondary btn-sm" href="{% url 'reservation:timesheet-list' %}">مدیریت تایم‌ها</a>
+  </div>
+
+  {% if doctors %}
+  <div class="row g-3">
+    {% for doc in doctors %}
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="card h-100 shadow-sm border-0 doctor-card">
+        <div class="card-body d-flex gap-3 align-items-center">
+          <div class="avatar d-flex align-items-center justify-content-center">
+            <span class="text-primary fw-bold">{{ doc.user.first_name|default:doc.user.username|slice:":1" }}</span>
+          </div>
+          <div class="flex-grow-1">
+            <h5 class="card-title mb-1">{{ doc }}</h5>
+            {% if doc.get_specialties %}<div class="mb-2">
+              <span class="chip">{{ doc.get_specialties }}</span>
+            </div>{% endif %}
+            <a href="{% url 'reservation:doctor-reserve' doctor_id=doc.id %}" class="btn btn-sm btn-primary">مشاهده تایم‌ها</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+    <div class="alert alert-info">هیچ پزشکی ثبت نشده است.</div>
+  {% endif %}
+</div>
+{% endblock %}
+
+

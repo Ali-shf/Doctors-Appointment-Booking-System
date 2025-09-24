@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}نتیجه پرداخت{% endblock %}
+
+{% block content %}
+{% block head %}
+<style>
+  .card { border:0; box-shadow: 0 6px 24px rgba(0,0,0,.06); }
+  .badge-code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+</style>
+{% endblock %}
+<div class="container my-4">
+  <div class="card shadow-sm border-0">
+    <div class="card-body">
+      {% if support_code %}
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <div class="rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center" style="width:56px;height:56px;">
+            <span class="text-success fw-bold">✓</span>
+          </div>
+          <div>
+            <h4 class="text-success mb-1">پرداخت با موفقیت انجام شد</h4>
+            <div class="small text-muted">جزئیات نوبت در ادامه</div>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <div class="text-muted">کد پیگیری شما:</div>
+          <div class="display-6 fw-bold ltr badge-code">{{ support_code }}</div>
+        </div>
+
+        {% if visit %}
+        <div class="row g-3">
+          <div class="col-12 col-md-6">
+            <div class="border rounded p-3 h-100">
+              <div class="fw-bold mb-2">اطلاعات نوبت</div>
+              <div class="mb-1">پزشک: {{ visit.doctor }}</div>
+              <div class="mb-1">کلینیک: {{ visit.clinic.name }}</div>
+              <div class="mb-1">تاریخ: {{ visit.date|date:"Y/m/d" }}</div>
+              <div class="mb-0">ساعت: {{ visit.start_meet|date:"H:i" }} - {{ visit.end_meet|date:"H:i" }}</div>
+            </div>
+          </div>
+          <div class="col-12 col-md-6">
+            <div class="border rounded p-3 h-100">
+              <div class="fw-bold mb-2">پرداخت</div>
+              <div>مبلغ: {{ visit.price }} ریال</div>
+              <div class="mt-2 d-flex gap-2">
+                <a href="{% url 'reservation:visit-list' %}" class="btn btn-primary btn-sm">مشاهده ویزیت‌ها</a>
+                <a href="{% url 'reservation:doctor-reserve' doctor_id=visit.doctor.id %}" class="btn btn-outline-secondary btn-sm">رزرو زمان دیگر</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+      {% else %}
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <div class="rounded-circle bg-danger bg-opacity-10 d-flex align-items-center justify-content-center" style="width:56px;height:56px;">
+            <span class="text-danger fw-bold">!</span>
+          </div>
+          <h4 class="text-danger mb-0">پرداخت ناموفق بود</h4>
+        </div>
+        <p>در صورت کسر وجه از حساب شما، مبلغ به صورت خودکار بازگشت داده می‌شود.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+

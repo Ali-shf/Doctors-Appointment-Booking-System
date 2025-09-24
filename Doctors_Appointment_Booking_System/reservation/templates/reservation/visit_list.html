@@ -1,51 +1,41 @@
-{% extends "reservation/base.html" %}
+{% extends "base.html" %}
 
-{% block title %}Visits - Reservation System{% endblock %}
+{% block title %}لیست ویزیت‌ها{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <h2 class="h3 mb-0">Visits</h2>
-  <a href="{% url 'reservation:visit-add' %}" class="btn btn-primary">
-    <i class="bi bi-plus-circle"></i> Book New Visit
-  </a>
+<div class="container my-4">
+  <h4 class="mb-3">ویزیت‌های من</h4>
+  {% if visits %}
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead>
+        <tr>
+          <th>پزشک</th>
+          <th>کلینیک</th>
+          <th>تاریخ</th>
+          <th>زمان</th>
+          <th>مبلغ</th>
+          <th>وضعیت</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for v in visits %}
+        <tr>
+          <td>{{ v.doctor }}</td>
+          <td>{{ v.clinic.name }}</td>
+          <td>{{ v.date|date:"Y/m/d" }}</td>
+          <td>{{ v.start_meet|date:"H:i" }} - {{ v.end_meet|date:"H:i" }}</td>
+          <td>{{ v.price }}</td>
+          <td>{{ v.get_status_display }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="alert alert-info">موردی یافت نشد.</div>
+  {% endif %}
 </div>
-
-{% if visits %}
-  <div class="row">
-    {% for visit in visits %}
-      <div class="col-md-6 col-lg-4 mb-4">
-        <div class="card h-100">
-          <div class="card-body">
-            <h5 class="card-title">Visit #{{ visit.id }}</h5>
-            <p class="card-text">
-              <strong>Doctor:</strong> {{ visit.doctor.user.get_full_name|default:visit.doctor.user.username }}<br>
-              <strong>Patient:</strong> {{ visit.patient.get_full_name|default:visit.patient.username }}<br>
-              <strong>Clinic:</strong> {{ visit.clinic.name }}<br>
-              <strong>Date:</strong> {{ visit.date|date:"M d, Y" }}<br>
-              <strong>Time:</strong> {{ visit.start_meet|date:"H:i" }} - {{ visit.end_meet|date:"H:i" }}<br>
-              <strong>Price:</strong> ${{ visit.price }}
-            </p>
-            <div class="d-flex gap-2">
-              <a href="{% url 'reservation:visit-edit' visit.pk %}" class="btn btn-outline-primary btn-sm">Edit</a>
-              <a href="{% url 'reservation:visit-delete' visit.pk %}" class="btn btn-outline-danger btn-sm">Delete</a>
-            </div>
-          </div>
-          <div class="card-footer text-muted small">
-            Created: {{ visit.created_at|date:"M d, Y" }}
-          </div>
-        </div>
-      </div>
-    {% endfor %}
-  </div>
-{% else %}
-  <div class="text-center py-5">
-    <div class="card">
-      <div class="card-body">
-        <h5 class="card-title">No Visits Found</h5>
-        <p class="card-text text-muted">You haven't booked any visits yet.</p>
-        <a href="{% url 'reservation:visit-add' %}" class="btn btn-primary">Book Your First Visit</a>
-      </div>
-    </div>
-  </div>
-{% endif %}
 {% endblock %}
+
+

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}انتخاب کلینیک{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+  <h4 class="mb-3">کلینیک‌ها</h4>
+  {% if clinics %}
+  <div class="row g-3">
+    {% for c in clinics %}
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="card h-100 shadow-sm border-0">
+        <div class="card-body">
+          <h5 class="card-title">{{ c.name }}</h5>
+          {% if c.address %}<div class="text-muted small mb-2">{{ c.address }}</div>{% endif %}
+          <a href="{% url 'reservation:clinic-doctor-list' clinic_id=c.id %}" class="btn btn-sm btn-primary">مشاهده پزشکان</a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="alert alert-info">کلینیکی ثبت نشده است.</div>
+  {% endif %}
+</div>
+{% endblock %}
+
+
