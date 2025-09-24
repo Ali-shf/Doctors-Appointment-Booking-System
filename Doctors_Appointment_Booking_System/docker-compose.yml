@@ -1,4 +1,3 @@
-version: "3.9"
 
 services:
   web:
@@ -8,7 +7,7 @@ services:
     volumes:
       - .:/usr/src/app
     ports:
-      - "8000:8000"
+      - "8001:8000"
     env_file: .env.dev
     depends_on:
       - db
@@ -17,7 +16,7 @@ services:
     image: postgres:15
     env_file: .env.dev
     volumes:
-      - postgres_data:/var/lib/postgresql/data/
+      - postgres_data_dev:/var/lib/postgresql/data/
 
 volumes:
-  postgres_data:
+  postgres_data_dev:
