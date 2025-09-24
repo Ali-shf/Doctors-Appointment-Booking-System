@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -32,6 +33,7 @@ ALLOWED_HOSTS = ["*"]
 # Application definition
 
 INSTALLED_APPS = [
+    "widget_tweaks",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -40,8 +42,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     "cities_light",
     "account.apps.AccountConfig",
-    'doctor',
     'reservation',
+    'doctor',
     'wallet',
     "allauth", "allauth.account", "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
@@ -50,6 +52,10 @@ INSTALLED_APPS = [
 
 AUTH_USER_MODEL = "user_account.User"
 
+
+CITIES_LIGHT_INCLUDE_COUNTRIES = ['IR','GB','US']
+
+CITIES_LIGHT_TRANSLATION_LANGUAGES = ['en']
 
 SITE_ID = 1
 AUTHENTICATION_BACKENDS = [
@@ -73,8 +79,6 @@ MIDDLEWARE = [
     "allauth.account.middleware.AccountMiddleware",
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # 'django.middleware.security.SecurityMiddleware',
-    # 'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 ROOT_URLCONF = 'Doctors_Appointment_Booking_System.urls'
@@ -145,7 +149,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
@@ -162,5 +166,14 @@ CACHES = {
 OTP_TTL_SECONDS = 180  # 3min
 OTP_MAX_ATTEMPTS = 5
 OTP_RESEND_COOLDOWN = 60  # seconds
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+from decouple import config
+EMAIL_HOST_USER = config("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 

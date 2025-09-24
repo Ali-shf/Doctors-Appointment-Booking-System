@@ -1,0 +1,16 @@
+{% extends "base_generic.html" %}
+{% block title %}Comment #{{ comment.pk }}{% endblock %}
+{% block content %}
+<div class="container my-4">
+  <div class="card p-4">
+    <h4>Comment #{{ comment.pk }}</h4>
+    <p><strong>Patient:</strong> {{ comment.patient_id }}</p>
+    <p><strong>Doctor:</strong> {{ comment.doctor_id|default:"—" }}</p>
+    <p><strong>Clinic:</strong> {{ comment.clinic_id|default:"—" }}</p>
+    <p><strong>Rate:</strong> {{ comment.rate }}/5</p>
+    <p><strong>Created:</strong> {{ comment.created_at|date:"Y-m-d H:i" }}</p>
+    <hr>
+    <p>{{ comment.comment|linebreaksbr }}</p>
+  </div>
+</div>
+{% endblock %}

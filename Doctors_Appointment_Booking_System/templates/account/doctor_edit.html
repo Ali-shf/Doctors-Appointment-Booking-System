@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "account/base.html" %}
 {% block title %}Edit Doctor Profile{% endblock %}
 {% block content %}
 
@@ -21,10 +21,10 @@
         {% csrf_token %}
         <div class="tab-content">
           <div class="tab-pane fade show active" id="account" role="tabpanel" aria-labelledby="account-tab">
-            {% include "_form_fields.html" with form=user_form %}
+            {% include "account/_form_fields.html" with form=user_form %}
           </div>
           <div class="tab-pane fade" id="doctor" role="tabpanel" aria-labelledby="doctor-tab">
-            {% include "_form_fields.html" with form=doctor_form %}
+            {% include "account/_form_fields.html" with form=doctor_form %}
           </div>
         </div>
 

@@ -5,12 +5,15 @@ from django.utils.html import format_html
 from doctor.models import Comment,Clinic
 
 
+
+
 @admin.register(Clinic)
 class ClinicAdmin(admin.ModelAdmin):
     list_display = (
-    "name","founded_date","address","working_hours")
+    "name","founded_date","address")
     search_fields = ("name" , "address")
     fieldsets = ((None, {"fields": ("name", "founded_date", "address", "description")}),("Working hours (JSON)", {"fields": ("working_hours",)}))
+
 
 
 
