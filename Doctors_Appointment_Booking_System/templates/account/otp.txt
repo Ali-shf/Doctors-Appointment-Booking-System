@@ -1,0 +1,2 @@
+Your Verification Code : {{ otp }}
+This code can't be used after 3 minutes

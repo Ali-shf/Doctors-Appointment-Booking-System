@@ -75,6 +75,8 @@ PyJWT==2.10.1
 PyMySQL==1.1.1
 pyparsing==3.2.3
 python-dateutil==2.9.0.post0
+feat-wallet-v01
+python-decouple==3.8
 python-utils==3.9.1
 pytz==2025.2
 PyYAML==6.0.2
