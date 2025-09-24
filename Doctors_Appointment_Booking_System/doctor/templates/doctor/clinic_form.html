@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base_generic.html" %}
 {% load widget_tweaks %}
 {% block title %}Create Clinic{% endblock %}
 
@@ -40,12 +40,12 @@
                 <div class="text-danger small">{{ form.address.errors }}</div>
               </div>
 
-              {% comment %} <div class="col-12">
-                <label class="form-label" for="{{ form.working_hours.id_for_label }}">Working hours</label>
-                {{ form.working_hours|add_class:"form-control" }}
-                <div class="form-text">e.g. Sat–Thu, 9:00–18:00</div>
-                <div class="text-danger small">{{ form.working_hours.errors }}</div>
-              </div> {% endcomment %}
+              <div class="col-12 mt-3">
+                <label class="form-label">Doctors</label>
+                {{ form.doctors }}
+                <div class="text-danger small">{{ form.doctors.errors }}</div>
+              </div>
+              
 
               <div class="col-12">
                 <label class="form-label" for="{{ form.description.id_for_label }}">Description</label>
