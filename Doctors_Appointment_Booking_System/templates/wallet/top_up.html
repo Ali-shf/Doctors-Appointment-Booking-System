@@ -1,0 +1,72 @@
+{% extends 'base_generic.html' %}
+{% block title %}Wallet - Top up{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+<div class="col-md-6">
+<div class="card p-4">
+<h4 class="mb-3">Top Up Wallet</h4>
+<form id="topUpForm">
+    {% csrf_token %}
+<div class="mb-3">
+<label class="form-label">Amount</label>
+<input id="amount" name="amount" class="form-control" placeholder="100.00">
+</div>
+<div class="d-flex gap-2">
+<button class="btn btn-primary" type="submit">Top up</button>
+<a class="btn btn-outline-secondary" href="{% url 'wallet:index' %}">Cancel</a>
+</div>
+</form>
+
+
+<div id="result" class="mt-3"></div>
+</div>
+</div>
+</div>
+
+
+{% block scripts %}
+<script>
+const form = document.getElementById("topUpForm");
+const resultBox = document.getElementById("result");
+form.onsubmit = async (e) => {
+    e.preventDefault();
+
+    const btn = form.querySelector("button[type=submit]");
+    btn.disabled = true;
+
+    const fd = new FormData(form);
+
+    try {
+        const res = await fetch("{% url 'wallet:top_up' %}", {
+            method: "POST",
+            body: fd,
+            headers: {
+                "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+                "X-Requested-With": "XMLHttpRequest"
+            }
+        });
+
+        let json;
+        try {
+            json = await res.json();
+        } catch (err) {
+            resultBox.innerHTML = `<div class="alert alert-danger">❌ Server did not return JSON.</div>`;
+            return;
+        }
+
+        if (!res.ok) {
+            resultBox.innerHTML = `<div class="alert alert-danger">❌ ${json.error || 'Something went wrong'}</div>`;
+        } else {
+            resultBox.innerHTML = `<div class="alert alert-success">✅ ${json.message} — New Balance: ${json.balance}</div>`;
+            form.reset();
+        }
+
+    } catch (err) {
+        resultBox.innerHTML = `<div class="alert alert-danger">❌ Request failed: ${err}</div>`;
+    } finally {
+        btn.disabled = false;
+    }
+};
+</script>
+{% endblock %}
+{% endblock %}

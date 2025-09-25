@@ -1,0 +1,52 @@
+{% extends "reservation/base.html" %}
+
+{% block title %}Email Messages - Reservation System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="h3 mb-0">Email Messages</h2>
+  <a href="{% url 'reservation:emailmessage-add' %}" class="btn btn-primary">
+    <i class="bi bi-plus-circle"></i> Send New Message
+  </a>
+</div>
+
+{% if emails %}
+  <div class="row">
+    {% for email in emails %}
+      <div class="col-12 mb-4">
+        <div class="card">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+              <h5 class="card-title mb-0">Message for Visit #{{ email.visit.id }}</h5>
+              <small class="text-muted">{{ email.created_at|date:"M d, Y H:i" }}</small>
+            </div>
+            <p class="card-text">
+              <strong>Doctor:</strong> {{ email.visit.doctor.user.get_full_name|default:email.visit.doctor.user.username }}<br>
+              <strong>Patient:</strong> {{ email.visit.patient.get_full_name|default:email.visit.patient.username }}<br>
+              <strong>Visit Date:</strong> {{ email.visit.date|date:"M d, Y" }} at {{ email.visit.start_meet|date:"H:i" }}
+            </p>
+            <div class="bg-light p-3 rounded">
+              <strong>Message:</strong><br>
+              {{ email.description|linebreaks }}
+            </div>
+            <div class="d-flex gap-2 mt-3">
+              <a href="{% url 'reservation:emailmessage-edit' email.pk %}" class="btn btn-outline-primary btn-sm">Edit</a>
+              <a href="{% url 'reservation:emailmessage-delete' email.pk %}" class="btn btn-outline-danger btn-sm">Delete</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="text-center py-5">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">No Email Messages Found</h5>
+        <p class="card-text text-muted">You haven't sent any email messages yet.</p>
+        <a href="{% url 'reservation:emailmessage-add' %}" class="btn btn-primary">Send Your First Message</a>
+      </div>
+    </div>
+  </div>
+{% endif %}
+{% endblock %}

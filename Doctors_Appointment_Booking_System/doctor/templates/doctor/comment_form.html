@@ -1,0 +1,58 @@
+{% extends "base_generic.html" %}
+{% block title %}Leave a Comment{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+      <div class="card shadow-sm">
+        <div class="card-body p-4">
+          <h3 class="mb-3">Leave a Comment</h3>
+
+          <div class="alert alert-light border mb-3">
+            You are commenting as <strong>{{ request.user.get_username }}</strong>.
+          </div>
+
+          {% if form.non_field_errors %}
+            <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+          {% endif %}
+
+          <form method="post" novalidate>
+            {% csrf_token %}
+
+            {# اگر initial داشتیم، فرم خودش فیلدهای clinic/doctor را Hidden کرده است #}
+            {% if form.doctor_id.is_hidden %}
+              {{ form.doctor_id }}
+            {% else %}
+              <div class="mb-3">
+                <label class="form-label" for="{{ form.doctor_id.id_for_label }}">Doctor (optional)</label>
+                {{ form.doctor_id }}
+                <div class="text-danger small">{{ form.doctor_id.errors }}</div>
+              </div>
+            {% endif %}
+
+
+            <div class="mb-3">
+              <label class="form-label" for="{{ form.rate.id_for_label }}">Rate (0–5)</label>
+              {{ form.rate }}
+              <div class="text-danger small">{{ form.rate.errors }}</div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" for="{{ form.comment.id_for_label }}">Comment</label>
+              {{ form.comment }}
+              <div class="text-danger small">{{ form.comment.errors }}</div>
+            </div>
+
+            <div class="d-flex gap-2 justify-content-end">
+              <a href="javascript:history.back()" class="btn btn-outline-secondary">Cancel</a>
+              <button type="submit" class="btn btn-primary">Submit</button>
+            </div>
+          </form>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,93 @@
+{% extends "base_generic.html" %}
+{% load widget_tweaks %}
+{% block title %}Create Clinic{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+      <div class="card shadow-sm">
+        <div class="card-body p-4">
+          <h3 class="mb-3">New Clinic</h3>
+
+          {# نمایش خطاهای کلی فرم #}
+          {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+              {{ form.non_field_errors }}
+            </div>
+          {% endif %}
+
+          <form method="post" novalidate>
+            {% csrf_token %}
+
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="form-label" for="{{ form.name.id_for_label }}">Name</label>
+                {{ form.name|add_class:"form-control" }}
+                <div class="text-danger small">{{ form.name.errors }}</div>
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="{{ form.founded_date.id_for_label }}">Founded date</label>
+                {{ form.founded_date|add_class:"form-control" }}
+                <div class="form-text">Select the founding date{% comment %} if DateField, use type="date" widget {% endcomment %}</div>
+                <div class="text-danger small">{{ form.founded_date.errors }}</div>
+              </div>
+
+              <div class="col-12">
+                <label class="form-label" for="{{ form.address.id_for_label }}">Address</label>
+                {{ form.address|add_class:"form-control" }}
+                <div class="text-danger small">{{ form.address.errors }}</div>
+              </div>
+
+              <div class="col-12 mt-3">
+                <label class="form-label">Doctors</label>
+                {{ form.doctors }}
+                <div class="text-danger small">{{ form.doctors.errors }}</div>
+              </div>
+              
+
+              <div class="col-12">
+                <label class="form-label" for="{{ form.description.id_for_label }}">Description</label>
+                {{ form.description|add_class:"form-control" }}
+                <div class="text-danger small">{{ form.description.errors }}</div>
+              </div>
+
+              <div class="col-12 col-md-4">
+                <label class="form-label" for="{{ form.country.id_for_label }}">Country</label>
+                {{ form.country|add_class:"form-select" }}
+                <div class="text-danger small">{{ form.country.errors }}</div>
+              </div>
+
+              <div class="col-12 col-md-4">
+                <label class="form-label" for="{{ form.region.id_for_label }}">Region</label>
+                {{ form.region|add_class:"form-select" }}
+                <div class="text-danger small">{{ form.region.errors }}</div>
+              </div>
+
+              <div class="col-12 col-md-4">
+                <label class="form-label" for="{{ form.city.id_for_label }}">City</label>
+                {{ form.city|add_class:"form-select" }}
+                <div class="text-danger small">{{ form.city.errors }}</div>
+              </div>
+            </div>
+
+            <div class="d-flex gap-2 justify-content-end mt-4">
+              <a href="{% url 'doctor:clinics_list' %}" class="btn btn-outline-secondary">Cancel</a>
+              <button type="submit" class="btn btn-primary">Create</button>
+            </div>
+          </form>
+
+        </div>
+      </div>
+
+      {# راهنمای پرمیشن (اختیاری) #}
+      {% if not perms.app.add_clinic %}
+        <div class="alert alert-warning mt-3">
+          You don’t have permission to add clinics. (Required perm: <code>app.add_clinic</code>)
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

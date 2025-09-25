@@ -1,0 +1,30 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*.so
+
+# Virtual environment
+venv/
+env/
+ENV/
+.venv/
+
+# Django
+*.log
+media/
+staticfiles/
+
+
+# IDE / Editor
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+*~
+*.swp
+
+# Build artifacts
+dist/
+build/
+*.egg-info/

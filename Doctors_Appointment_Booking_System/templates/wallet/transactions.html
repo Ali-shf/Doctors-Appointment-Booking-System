@@ -1,0 +1,99 @@
+{% extends 'base_generic.html' %}
+
+{% block title %}Wallet - Transactions{% endblock %}
+
+{% block content %}
+<div class="col-lg-8">
+  <div class="card p-4">
+    <h4 class="mb-3">Transactions</h4>
+
+    <div class="mb-3 d-flex gap-2">
+      <select id="filter-type" class="form-select w-auto">
+        <option value="">All</option>
+        <option value="DEPOSIT">Deposit</option>
+        <option value="PAYMENT">Payment</option>
+        <option value="REFUND">Refund</option>
+      </select>
+      <button id="apply" class="btn btn-primary">Apply</button>
+    </div>
+
+    <div id="tx-list"></div>
+    <nav id="pager" class="mt-3"></nav>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const typeSelect = document.getElementById('filter-type');
+  const applyBtn = document.getElementById('apply');
+  const txList = document.getElementById('tx-list');
+  const pager = document.getElementById('pager');
+
+  // Safety check: اگه المنت‌ها پیدا نشدن، کد ادامه پیدا نکنه
+  if (!typeSelect || !applyBtn || !txList || !pager) return;
+
+  let page = 1;
+
+  async function load() {
+    const type = typeSelect.value;
+    const url = new URL('{% url "wallet:transactions" %}', window.location.origin);
+    url.searchParams.set('page', page);
+    if (type) url.searchParams.set('type', type);
+
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("Failed to fetch transactions");
+      const json = await res.json();
+
+      // لیست تراکنش‌ها
+      txList.innerHTML = '';
+      json.results.forEach(t => {
+        const el = document.createElement('div');
+        el.className = 'mb-2 border-bottom pb-2';
+        el.innerHTML = `<div><strong>${t.payment_type}</strong> — ${t.amount}</div>
+                        <div class="text-muted small">${new Date(t.created_at).toLocaleString()}</div>`;
+        txList.appendChild(el);
+      });
+
+      // Pagination
+      pager.innerHTML = '';
+      if (json.num_pages > 1) {
+        const ul = document.createElement('ul');
+        ul.className = 'pagination';
+
+        if (json.page > 1)
+          ul.innerHTML += `<li class="page-item"><a class="page-link" href="#" data-page="${json.page-1}">Prev</a></li>`;
+
+        ul.innerHTML += `<li class="page-item disabled"><span class="page-link">Page ${json.page} / ${json.num_pages}</span></li>`;
+
+        if (json.page < json.num_pages)
+          ul.innerHTML += `<li class="page-item"><a class="page-link" href="#" data-page="${json.page+1}">Next</a></li>`;
+
+        pager.appendChild(ul);
+
+        pager.querySelectorAll('a[data-page]').forEach(a => {
+          a.addEventListener('click', ev => {
+            ev.preventDefault();
+            page = parseInt(a.dataset.page);
+            load();
+          });
+        });
+      }
+    } catch (err) {
+      txList.innerHTML = `<div class="text-danger">Error loading transactions: ${err.message}</div>`;
+      pager.innerHTML = '';
+      console.error(err);
+    }
+  }
+
+  // Event listeners
+  typeSelect.addEventListener('change', () => { page = 1; load(); });
+  applyBtn.addEventListener('click', () => { page = 1; load(); });
+
+  // Load initial page
+  load();
+});
+</script>
+{% endblock %}
