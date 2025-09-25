@@ -1,0 +1,34 @@
+{% extends "base_generic.html" %}
+
+{% block title %}Clinic Doctors{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">{{ clinic.name }} Doctors</h2>
+    <a class="btn btn-outline-secondary btn-sm" href="{% url 'reservation:clinic-list' %}">Change Clinic</a>
+  </div>
+
+  {% if doctors %}
+  <div class="row g-3">
+    {% for doc in doctors %}
+    <div class="col-12 col-sm-6 col-lg-4">
+      <div class="card h-100 p-3">
+        <h5 class="fw-semibold d-flex justify-content-between align-items-center">
+          <span>{{ doc }}</span>
+        </h5>
+        {% if doc.get_specialties %}
+          <div class="text-muted small mb-2">{{ doc.get_specialties }}</div>
+        {% endif %}
+        <a href="{% url 'reservation:doctor-reserve' clinic_id=clinic.id doctor_id=doc.id %}" class="btn btn-outline-primary w-100 mt-auto">View Times</a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="alert alert-info">No doctors with active times found for this clinic.</div>
+  {% endif %}
+</div>
+{% endblock %}
+
+

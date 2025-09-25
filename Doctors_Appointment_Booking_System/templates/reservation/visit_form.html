@@ -1,0 +1,55 @@
+{% extends "base_generic.html" %}
+{% load widget_tweaks %}
+
+{% block title %}Visit Form{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+      <div class="card shadow-sm">
+        <div class="card-body p-4">
+          <h3 class="mb-3">{% if form.instance.pk %}Edit Visit{% else %}New Visit{% endif %}</h3>
+
+          {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+              {{ form.non_field_errors }}
+            </div>
+          {% endif %}
+
+          <form method="post" novalidate>
+            {% csrf_token %}
+
+            <div class="row g-3">
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="{{ form.patient.id_for_label }}">Patient</label>
+                {{ form.patient|add_class:"form-select" }}
+                <div class="text-danger small">{{ form.patient.errors }}</div>
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="{{ form.timesheet.id_for_label }}">Timesheet</label>
+                {{ form.timesheet|add_class:"form-select" }}
+                <div class="text-danger small">{{ form.timesheet.errors }}</div>
+              </div>
+
+              <div class="col-12">
+                <label class="form-label" for="{{ form.status.id_for_label }}">Status</label>
+                {{ form.status|add_class:"form-select" }}
+                <div class="text-danger small">{{ form.status.errors }}</div>
+              </div>
+            </div>
+
+            <div class="d-flex gap-2 justify-content-end mt-4">
+              <a href="{% url 'reservation:visit-list' %}" class="btn btn-outline-secondary">Cancel</a>
+              <button type="submit" class="btn btn-primary">Save</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+

@@ -1,0 +1,41 @@
+{% extends "base_generic.html" %}
+
+{% block title %}Timesheet List{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Timesheets</h2>
+    <a class="btn btn-primary btn-sm" href="{% url 'reservation:timesheet-add' %}">Add Timesheet</a>
+  </div>
+
+  {% if timesheets %}
+  <div class="row g-3">
+    {% for ts in timesheets %}
+    <div class="col-12 col-sm-6 col-lg-4">
+      <div class="card h-100 p-3">
+        <h5 class="fw-semibold d-flex justify-content-between align-items-center">
+          <span>{{ ts.doctor }}</span>
+          {% if ts.is_available %}
+            <span class="badge bg-success">Available</span>
+          {% else %}
+            <span class="badge bg-secondary">Unavailable</span>
+          {% endif %}
+        </h5>
+        <div class="text-muted small mb-2">{{ ts.clinic.name }}</div>
+        <div class="text-muted small mb-3">{{ ts.visit_time|date:"Y/m/d H:i" }}</div>
+        <div class="d-flex gap-2">
+          <a class="btn btn-sm btn-outline-primary" href="{% url 'reservation:timesheet-edit' ts.pk %}">Edit</a>
+          <a class="btn btn-sm btn-outline-danger" href="{% url 'reservation:timesheet-delete' ts.pk %}">Delete</a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="alert alert-info">No items found.</div>
+  {% endif %}
+</div>
+{% endblock %}
+
+

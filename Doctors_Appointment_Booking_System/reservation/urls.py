@@ -1,10 +1,10 @@
 from django.urls import path
 from .views import (
     TimeSheetListView, TimeSheetCreateView, TimeSheetUpdateView, TimeSheetDeleteView,
-    VisitListView, DoctorListForReservationView,
-    ClinicListForReservationView, DoctorListByClinicView,
+    VisitListView, VisitCreateView, VisitUpdateView, VisitDeleteView,
+    DoctorListForReservationView, ClinicListForReservationView, DoctorListByClinicView,
     DoctorReservationView, PaymentSuccessView, PaymentStartView,
-    VisitLogListView, VisitLogCreateView, VisitLogUpdateView, VisitLogDeleteView,
+    DoctorTimesheetsAPIView,
 )
 
 app_name = "reservation"
@@ -24,9 +24,15 @@ urlpatterns = [
 
     # لیست ویزیت‌ها (برای کاربر/دکتر)
     path("visits/", VisitListView.as_view(), name="visit-list"),
+    path("visits/add/", VisitCreateView.as_view(), name="visit-add"),
+    path("visits/<int:pk>/edit/", VisitUpdateView.as_view(), name="visit-edit"),
+    path("visits/<int:pk>/delete/", VisitDeleteView.as_view(), name="visit-delete"),
 
     # صفحه رزرو دکتر در کلینیک مشخص
     path("reserve/clinic/<int:clinic_id>/doctor/<int:doctor_id>/", DoctorReservationView.as_view(), name="doctor-reserve"),
+    
+    # API برای دریافت تایم‌شیت‌های دکتر در فرمت JSON
+    path("api/clinic/<int:clinic_id>/doctor/<int:doctor_id>/timesheets/", DoctorTimesheetsAPIView.as_view(), name="doctor-timesheets-api"),
 
     # پرداخت موفق (نمایش کد پیگیری)
     path("reserve/payment/success/", PaymentSuccessView.as_view(), name="payment-success"),

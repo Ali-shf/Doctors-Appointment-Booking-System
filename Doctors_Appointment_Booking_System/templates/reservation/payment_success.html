@@ -1,0 +1,72 @@
+{% extends "base_generic.html" %}
+
+{% block title %}Payment Result{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+      <div class="card shadow-sm">
+        <div class="card-body p-4">
+          {% if support_code %}
+            <div class="d-flex align-items-center gap-3 mb-4">
+              <div class="rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center" style="width:56px;height:56px;">
+                <span class="text-success fw-bold">✓</span>
+              </div>
+              <div>
+                <h3 class="text-success mb-1">Payment Successful</h3>
+                <div class="text-muted">Appointment details below</div>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <div class="text-muted">Your tracking code:</div>
+              <div class="display-6 fw-bold text-primary">{{ support_code }}</div>
+            </div>
+
+            {% if visit %}
+            <div class="row g-3 mb-4">
+              <div class="col-12 col-md-6">
+                <div class="card h-100 p-3">
+                  <h5 class="mb-3">Appointment Information</h5>
+                  <dl class="row mb-0">
+                    <dt class="col-sm-4">Doctor</dt>
+                    <dd class="col-sm-8">{{ visit.doctor }}</dd>
+                    <dt class="col-sm-4">Clinic</dt>
+                    <dd class="col-sm-8">{{ visit.clinic.name }}</dd>
+                    <dt class="col-sm-4">Date</dt>
+                    <dd class="col-sm-8">{{ visit.date|date:"Y/m/d" }}</dd>
+                    <dt class="col-sm-4">Time</dt>
+                    <dd class="col-sm-8">{{ visit.start_meet|date:"H:i" }} - {{ visit.end_meet|date:"H:i" }}</dd>
+                  </dl>
+                </div>
+              </div>
+              <div class="col-12 col-md-6">
+                <div class="card h-100 p-3">
+                  <h5 class="mb-3">Payment</h5>
+                  <div class="fw-semibold text-primary mb-3">${{ visit.price }}</div>
+                  <div class="d-flex gap-2">
+                    <a href="{% url 'reservation:visit-list' %}" class="btn btn-primary btn-sm">View Visits</a>
+                    <a href="{% url 'reservation:doctor-reserve' clinic_id=visit.clinic.id doctor_id=visit.doctor.id %}" class="btn btn-outline-secondary btn-sm">Book Another Time</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+          {% else %}
+            <div class="d-flex align-items-center gap-3 mb-4">
+              <div class="rounded-circle bg-danger bg-opacity-10 d-flex align-items-center justify-content-center" style="width:56px;height:56px;">
+                <span class="text-danger fw-bold">!</span>
+              </div>
+              <h3 class="text-danger mb-0">Payment Failed</h3>
+            </div>
+            <p>If money was deducted from your account, it will be automatically refunded.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+

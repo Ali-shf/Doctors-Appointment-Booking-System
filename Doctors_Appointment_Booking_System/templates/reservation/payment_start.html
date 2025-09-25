@@ -1,0 +1,53 @@
+{% extends "base_generic.html" %}
+
+{% block title %}Payment{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+      <div class="card shadow-sm">
+        <div class="card-body p-4">
+          <h3 class="mb-3">Appointment Details</h3>
+          <p class="text-muted mb-4">Please complete your payment</p>
+
+          <div class="row g-3 mb-4">
+            <div class="col-12 col-md-6">
+              <div class="card h-100 p-3">
+                <h5 class="mb-3">Visit Information</h5>
+                <dl class="row mb-0">
+                  <dt class="col-sm-4">Doctor</dt>
+                  <dd class="col-sm-8">{{ visit.doctor }}</dd>
+                  <dt class="col-sm-4">Clinic</dt>
+                  <dd class="col-sm-8">{{ visit.clinic.name }}</dd>
+                  <dt class="col-sm-4">Date</dt>
+                  <dd class="col-sm-8">{{ visit.date|date:"Y/m/d" }}</dd>
+                  <dt class="col-sm-4">Time</dt>
+                  <dd class="col-sm-8">{{ visit.start_meet|date:"H:i" }} - {{ visit.end_meet|date:"H:i" }}</dd>
+                </dl>
+              </div>
+            </div>
+            <div class="col-12 col-md-6">
+              <div class="card h-100 p-3">
+                <h5 class="mb-3">Payment</h5>
+                <div class="fw-semibold text-primary mb-2">${{ visit.price }}</div>
+                <div class="alert alert-info">Payment Gateway: (Empty)</div>
+              </div>
+            </div>
+          </div>
+
+          <form method="post">
+            {% csrf_token %}
+            <div class="d-flex gap-2 justify-content-end">
+              <a href="{% url 'reservation:doctor-reserve' clinic_id=visit.clinic.id doctor_id=visit.doctor.id %}" class="btn btn-outline-secondary">Back</a>
+              <button type="submit" class="btn btn-success">Complete Payment (Simulation)</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+

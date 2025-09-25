@@ -4,10 +4,10 @@ from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.views import View
 from django.urls import reverse_lazy, reverse
 from django.contrib import messages
+from django.http import JsonResponse
 from decimal import Decimal
 from datetime import datetime, timedelta, time as dtime
 import re
-import uuid
 import random
 
 from .models import TimeSheet, Visit, VisitLog
@@ -149,7 +149,19 @@ class DoctorReservationView(View):
             .select_related("doctor__user", "clinic")
             .order_by("end")
         )
-        context = {"doctor": doctor, "clinic": clinic, "timesheets": timesheets}
+        
+        # Process timesheets using the new model method
+        processed_timesheets = []
+        for ts in timesheets:
+            # Force refresh to ensure we get the latest data
+            ts.refresh_slots()
+            processed_timesheets.append(ts.get_timesheet_data())
+        
+        context = {
+            "doctor": doctor, 
+            "clinic": clinic, 
+            "timesheets": processed_timesheets
+        }
         return render(request, self.template_name, context)
 
     def post(self, request, clinic_id, doctor_id):
@@ -279,25 +291,76 @@ class PaymentStartView(LoginRequiredMixin, View):
         visit.save(update_fields=["status"])
         # حذف بازه زمانی از تایم‌شیت مرتبط تا دوباره قابل رزرو نباشد
         try:
+            # Create multiple variants of the time slot to ensure we catch all formats
+            time_obj = visit.start_meet.time()
             slot_variants = {
                 visit.start_meet.strftime("%H:%M"),
                 visit.start_meet.strftime("%H:%M:%S"),
+                str(time_obj),
+                str(time_obj.strftime("%H:%M")),
+                time_obj.strftime("%H:%M"),
+                time_obj.strftime("%H:%M:%S"),
             }
+            
+            print(f"Removing slot variants: {slot_variants}")
+            
             related_timesheets = (
                 TimeSheet.objects
                 .filter(doctor=visit.doctor, clinic=visit.clinic, end__date=visit.date)
                 .order_by("end")
             )
+            
             for ts in related_timesheets:
                 if isinstance(ts.visit_time, list) and ts.visit_time:
                     original = list(ts.visit_time)
-                    updated = [t for t in original if str(t) not in slot_variants]
+                    print(f"Original timesheet slots: {original}")
+                    
+                    # Remove the booked time slot from available slots
+                    updated = []
+                    removed_slots = []
+                    
+                    for t in original:
+                        slot_str = str(t)
+                        should_remove = False
+                        
+                        # Check if this slot matches any of the booked slot variants
+                        for variant in slot_variants:
+                            if (slot_str == variant or 
+                                slot_str == variant.replace(":", "") or
+                                variant in slot_str or
+                                slot_str in variant):
+                                should_remove = True
+                                removed_slots.append(slot_str)
+                                print(f"Removing slot: {slot_str} (matched variant: {variant})")
+                                break
+                        
+                        if not should_remove:
+                            updated.append(t)
+                    
                     if updated != original:
                         ts.visit_time = updated
                         ts.save(update_fields=["visit_time", "updated_at"])
+                        print(f"Updated timesheet {ts.id}. Removed slots: {removed_slots}")
+                        print(f"New available slots: {updated}")
                         break
-        except Exception:
-            pass
+                    else:
+                        print(f"No changes needed for timesheet {ts.id} - no matching slots found")
+                        print(f"Original slots: {original}")
+                        print(f"Slot variants to remove: {slot_variants}")
+        except Exception as e:
+            print(f"Error updating timesheet: {e}")
+            import traceback
+            traceback.print_exc()
+        
+        # Force refresh the timesheet data to ensure consistency
+        try:
+            from django.core.cache import cache
+            cache_key = f"timesheet_{visit.doctor.id}_{visit.clinic.id}_{visit.date}"
+            cache.delete(cache_key)
+            print(f"Cleared cache for timesheet: {cache_key}")
+        except Exception as e:
+            print(f"Error clearing cache: {e}")
+            
         return redirect(reverse("reservation:payment-success") + f"?support_code={cart.support_code}&visit_id={visit.id}")
 
 
@@ -312,3 +375,42 @@ class PaymentSuccessView(LoginRequiredMixin, View):
             visit = get_object_or_404(Visit.objects.select_related("doctor__user", "patient", "clinic"), pk=visit_id)
         context = {"support_code": support_code, "visit": visit}
         return render(request, self.template_name, context)
+
+
+class DoctorTimesheetsAPIView(View):
+    """API view to get doctor timesheets in JSON format"""
+    
+    def get(self, request, clinic_id, doctor_id):
+        doctor = get_object_or_404(AccountDoctor, pk=doctor_id)
+        clinic = get_object_or_404(Clinic, pk=clinic_id)
+        
+        timesheets = (
+            TimeSheet.objects
+            .filter(doctor=doctor, clinic=clinic)
+            .select_related("doctor__user", "clinic")
+            .order_by("end")
+        )
+        
+        # Get structured data for each timesheet
+        timesheet_data = []
+        for ts in timesheets:
+            data = ts.get_timesheet_data()
+            # Convert datetime objects to strings for JSON serialization
+            data['end'] = ts.end.isoformat()
+            data['created_at'] = ts.created_at.isoformat()
+            data['updated_at'] = ts.updated_at.isoformat()
+            timesheet_data.append(data)
+        
+        return JsonResponse({
+            'doctor': {
+                'id': doctor.id,
+                'name': str(doctor),
+                'specialties': doctor.get_specialties() if hasattr(doctor, 'get_specialties') else ''
+            },
+            'clinic': {
+                'id': clinic.id,
+                'name': clinic.name,
+                'address': clinic.address
+            },
+            'timesheets': timesheet_data
+        })
