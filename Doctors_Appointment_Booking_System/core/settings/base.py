@@ -2,13 +2,13 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv()  # reads environment variables from .env files
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
-if not SECRET_KEY:
-    raise ValueError("No SECRET_KEY set for Django. Set DJANGO_SECRET_KEY in your .env file!")
+# if not SECRET_KEY:
+#     raise ValueError("No SECRET_KEY set for Django. Set DJANGO_SECRET_KEY in your .env file!")
 
 
 DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
@@ -39,6 +39,7 @@ AUTH_USER_MODEL = "user_account.User"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -83,7 +84,15 @@ DATABASES = {
 
 
 STATIC_URL = "/static/"
+
+STATICFILES_DIRS = [ BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 # Redis cache 
 CACHES = {

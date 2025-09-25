@@ -14,10 +14,6 @@ ENV/
 media/
 staticfiles/
 
-# Environment files
-.env
-.env.dev
-.env.prod
 
 # IDE / Editor
 .vscode/
