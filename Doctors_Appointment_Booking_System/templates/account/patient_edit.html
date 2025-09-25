@@ -1,0 +1,33 @@
+{% extends "account/base.html" %}
+{% block title %}Edit Patient Profile{% endblock %}
+{% block content %}
+
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card p-4">
+      <h4 class="mb-3">Edit Profile</h4>
+
+      <form method="post">
+        {% csrf_token %}
+        <fieldset class="mb-3">
+          <legend class="fs-6 text-muted">Account</legend>
+          {% include "account/_form_fields.html" with form=user_form %}
+        </fieldset>
+
+        {% if patient_form and patient_form.visible_fields %}
+          <fieldset class="mb-3">
+            <legend class="fs-6 text-muted">Patient</legend>
+            {% include "account/_form_fields.html" with form=patient_form %}
+          </fieldset>
+        {% endif %}
+
+        <div class="d-flex gap-2">
+          <button class="btn btn-success">Save changes</button>
+          <a href="{% url 'patient_profile' %}" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

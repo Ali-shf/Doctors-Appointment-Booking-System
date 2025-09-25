@@ -1,0 +1,126 @@
+{% extends "base_generic.html" %}
+{% load static %}
+{% load visit_filters %}  {# load custom filter #}
+
+{% block title %}Clinic – {{ clinic.name }}{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h2 class="mb-0">{{ clinic.name }}</h2>
+    <div class="d-flex align-items-center gap-2">
+      {% if clinic.rate_count %}
+        <span class="badge text-bg-warning">
+          ★ {{ clinic.avg_rate|floatformat:1 }}/5
+          <span class="text-muted">({{ clinic.rate_count }})</span>
+        </span>
+      {% else %}
+        <span class="badge text-bg-secondary">No ratings</span>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <!-- Left: details + comments -->
+    <div class="col-12 col-lg-8">
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="mb-3">Details</h5>
+          <dl class="row mb-0">
+            <dt class="col-sm-3">Founded date</dt>
+            <dd class="col-sm-9">{{ clinic.founded_date|default:"—" }}</dd>
+            <dt class="col-sm-3">Address</dt>
+            <dd class="col-sm-9">{{ clinic.address|default:"—" }}</dd>
+            <dt class="col-sm-3">Location</dt>
+            <dd class="col-sm-9">
+              {{ clinic.country.name|default:"—" }}
+              {% if clinic.region %} / {{ clinic.region.name }}{% endif %}
+              {% if clinic.city %} / {{ clinic.city.name }}{% endif %}
+            </dd>
+            <dt class="col-sm-3">Description</dt>
+            <dd class="col-sm-9">{{ clinic.description|default:"—" }}</dd>
+          </dl>
+        </div>
+      </div>
+
+      <!-- Comments -->
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <h5 class="mb-0">Comments</h5>
+          </div>
+
+          {% if comments %}
+            <ul class="list-group list-group-flush">
+              {% for c in comments %}
+                <li class="list-group-item">
+                  <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                      <div class="fw-semibold">
+                        {{ c.patient_id }} 
+                        <span class="text-muted small">rated {{ c.rate }}/5</span>
+                      </div>
+                      <div class="text-muted small">
+                        {% if c.created_at %}{{ c.created_at|date:"Y-m-d H:i" }}{% endif %}
+                      </div>
+                    </div>
+                  </div>
+                  <p class="mb-0 mt-2">{{ c.comment|linebreaksbr }}</p>
+                  <a class="small d-inline-block mt-2" href="{% url 'doctor:detail' c.pk %}">View</a>
+                  {% if user.is_authenticated and c.patient_id.user_id == user.id %}
+                    <a class="small d-inline-block mt-2" href="{% url 'doctor:comment_update' c.pk %}">Edit</a>
+                    <a href="{% url 'doctor:comment_delete' c.pk %}?next={% url 'doctor:clinic_detail' clinic.pk %}">Delete</a>
+                  {% endif %}
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <div class="text-muted">No comments yet.</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: doctors -->
+    <div class="col-12 col-lg-4">
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="mb-3">Doctors</h5>
+          {% if clinic.doctors.all %}
+            <ul class="list-group list-group-flush">
+              {% for d in clinic.doctors.all %}
+                <li class="list-group-item d-flex justify-content-between align-items-start">
+                  <div>
+                    <div class="fw-semibold">
+                      Dr. {{ d.user.get_full_name|default:d.user.username }}
+                    </div>
+                    <div class="small text-muted mb-1">Specialties</div>
+                    {% for s in d.specialties.all %}
+                      <span class="badge text-bg-primary me-1 mb-1">{{ s.get_code_display }}</span>
+                    {% empty %}
+                      <span class="text-muted">—</span>
+                    {% endfor %}
+                  </div>
+                  <div class="d-flex flex-column align-items-end">
+                    <a class="btn btn-sm btn-outline-primary mb-1" href="{% url 'doctor:clinic_detail' d.pk %}">Reserve</a>
+                    {% comment %} <a class="btn btn-sm btn-outline-primary mb-1" href="{% url 'reservation:doctor-reserve' d.pk %}">Reserve</a> {% endcomment %}
+
+                    {% if user|has_visited:d %}
+                      <a class="btn btn-sm btn-primary" 
+                         href="{% url 'doctor:comment_create' %}?clinic={{ clinic.pk }}&doctor={{ d.pk }}">
+                         Leave a comment
+                      </a>
+                    {% endif %}
+                  </div>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <div class="text-muted">No doctors assigned.</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

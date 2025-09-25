@@ -1,0 +1,51 @@
+{% extends "account/base.html" %}
+{% block title %}My Patient Profile{% endblock %}
+{% block content %}
+
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card p-4">
+      <div class="d-flex align-items-center justify-content-between">
+        <h4 class="mb-0">Patient Profile</h4>
+        <div>
+          <a href="{% url 'patient_edit' %}" class="btn btn-primary">Edit</a>
+          <a href="{% url 'password_change' %}" class="btn btn-outline-secondary">Change Password</a>
+        </div>
+      </div>
+      <hr>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <div class="small text-muted">Name</div>
+          <div class="fw-semibold">{{ request.user.get_full_name|default:request.user.username }}</div>
+        </div>
+        <div class="col-md-6">
+          <div class="small text-muted">Email</div>
+          <div class="fw-semibold">{{ request.user.email|default:"—" }}</div>
+        </div>
+        <div class="col-md-6">
+          <div class="small text-muted">Phone</div>
+          <div class="fw-semibold">{{ request.user.phone|default:"—" }}</div>
+        </div>
+        <div class="col-md-6">
+          <div class="small text-muted">Gender</div>
+          <div class="fw-semibold">{{ request.user.get_gender_display|default:"—" }}</div>
+        </div>
+        <div class="col-md-12">
+          <div class="small text-muted">Address</div>
+          <div class="fw-semibold">{{ request.user.address|default:"—" }}</div>
+        </div>
+        <div class="col-md-12">
+          <div class="small text-muted">Location</div>
+          <div class="fw-semibold">
+            {% if request.user.country %}{{ request.user.country.name }}{% endif %}
+            {% if request.user.province %} / {{ request.user.province.name }}{% endif %}
+            {% if request.user.city %} / {{ request.user.city.name }}{% endif %}
+            {% if not request.user.country and not request.user.province and not request.user.city %}—{% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

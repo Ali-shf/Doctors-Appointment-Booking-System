@@ -1,0 +1,135 @@
+{% extends "account/base.html" %}
+{% block title %}Doctors Directory{% endblock %}
+{% block content %}
+
+<form class="mb-4">
+  <div class="row g-3 align-items-stretch">
+
+    <!-- LEFT: Search box -->
+    <div class="col-12 col-lg-8">
+      <div class="card h-100 p-3">
+        <label class="form-label">Search</label>
+        <input name="q" value="{{ q }}" class="form-control"
+               placeholder="Name, university, medical ID...">
+      </div>
+      <div class="mt-2">
+          <small class="text-muted">
+            total match : {{ num_match }}
+          </small>
+      </div>
+      <div class="mt-2">
+        <small class="text-mutedya">
+            {% if is_paginated %}
+            showing : {{ page_obj.start_index }} - {{ page_obj.end_index }}
+            {% endif %}
+        </small>
+      </div>
+    </div>
+
+    <!-- RIGHT: Specialties filter (sidebar) -->
+    <div class="col-12 col-lg-4">
+      <div class="card h-100 p-3">
+        <div class="d-flex align-items-center justify-content-between">
+          <label class="form-label mb-0">Specialties</label>
+          <small class="text-muted">multi-select</small>
+        </div>
+        <div class="border rounded mt-2 p-3" style="max-height: 260px; overflow:auto;">
+          {% for s in specialties %}
+            <div class="form-check px-3 py-2 border-bottom">
+              <input class="form-check-input" type="checkbox"
+                     id="spec_{{ s.code }}" name="specialty"
+                     value="{{ s.code }}"
+                     {% if s.code in specialties_selected %}checked{% endif %}>
+              <label class="form-check-label" for="spec_{{ s.code }}">
+                {{ s.get_code_display }}
+              </label>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="col-12">
+      <div class="d-flex gap-2 justify-content-end">
+        <button class="btn btn-primary">Apply</button>
+        <a href="{% url 'doctors_list' %}" class="btn btn-outline-secondary">Reset</a>
+      </div>
+    </div>
+
+  </div>
+</form>
+
+<!-- RESULTS GRID -->
+<div class="row g-3">
+  {% for d in doctors %}
+    <div class="col-12 col-sm-6 col-lg-4">
+      <div class="card h-100 p-3">
+        <div class="d-flex align-items-center gap-3">
+          <div class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center"
+               style="width:64px;height:64px;font-size:22px;">
+            {{ d.user.first_name|default:d.user.username|first|upper }}
+          </div>
+          <div>
+            <div class="fw-semibold">
+              Dr. {{ d.user.get_full_name|default:d.user.username }}
+            </div>
+            <div class="text-muted small">{{ d.university|default:"—" }}</div>
+          </div>
+        </div>
+        <hr>
+        <div class="mb-2">
+          {% for s in d.specialties.all %}
+            <span class="badge text-bg-primary me-1 mb-1">{{ s.get_code_display }}</span>
+          {% empty %}
+            <span class="text-muted">No specialty</span>
+          {% endfor %}
+        </div>
+        <div class="mt-auto">
+          <a class="btn btn-outline-primary w-100"
+             href="{% url 'doctor_public_detail' d.pk %}">
+            View Profile
+          </a>
+        </div>
+      </div>
+    </div>
+  {% empty %}
+    <div class="col-12">
+      <div class="alert alert-info">No doctors found for this filter.</div>
+    </div>
+  {% endfor %}
+</div>
+
+{% if is_paginated %}
+  <nav class="mt-4">
+    <ul class="pagination justify-content-center">
+      {% if page_obj.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?{{ query_string }}&page={{ page_obj.previous_page_number }}">Previous</a>
+        </li>
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">Previous</span></li>
+      {% endif %}
+
+      {% for num in paginator.page_range %}
+        {% if num == page_obj.number %}
+          <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+        {% elif num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+          <li class="page-item">
+            <a class="page-link" href="?{{ query_string }}&page={{ num }}">{{ num }}</a>
+          </li>
+        {% endif %}
+      {% endfor %}
+
+      {% if page_obj.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="?{{ query_string }}&page={{ page_obj.next_page_number }}">Next</a>
+        </li>
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">Next</span></li>
+      {% endif %}
+    </ul>
+  </nav>
+{% endif %}
+
+{% endblock %}
