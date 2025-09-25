@@ -102,8 +102,8 @@
                     {% endfor %}
                   </div>
                   <div class="d-flex flex-column align-items-end">
-                    <a class="btn btn-sm btn-outline-primary mb-1" href="{% url 'doctor:clinic_detail' d.pk %}">Reserve</a>
-                    {% comment %} <a class="btn btn-sm btn-outline-primary mb-1" href="{% url 'reservation:doctor-reserve' d.pk %}">Reserve</a> {% endcomment %}
+                    {% comment %} <a class="btn btn-sm btn-outline-primary mb-1" href="{% url 'doctor:clinic_detail' d.pk %}">Reserve</a> {% endcomment %}
+                    <a class="btn btn-sm btn-outline-primary mb-1" href="{% url 'reservation:timesheet-list' %}">Reserve</a>
 
                     {% if user|has_visited:d %}
                       <a class="btn btn-sm btn-primary" 
