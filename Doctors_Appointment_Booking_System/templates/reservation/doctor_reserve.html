@@ -1,0 +1,199 @@
+{% extends "base_generic.html" %}
+{% load static %}
+
+{% block title %}Book Appointment - {{ doctor }} at {{ clinic.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .timesheet-form {
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .time-slot-btn {
+        transition: all 0.2s ease;
+        border-radius: 6px;
+        font-weight: 500;
+    }
+    
+    .time-slot-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .time-slot-btn:active {
+        transform: translateY(0);
+    }
+    
+    .card {
+        transition: all 0.3s ease;
+        border: 1px solid #e9ecef;
+    }
+    
+    .card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+    }
+    
+    .timesheet-date {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 0.9em;
+        font-weight: 600;
+    }
+    
+    .available-slots {
+        background-color: #f8f9fa;
+        border-radius: 6px;
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+    
+    .booked-slots {
+        background-color: #fff3cd;
+        border-radius: 6px;
+        padding: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center" style="width:56px;height:56px;">
+            <span class="text-primary fw-bold">{{ doctor.user.first_name|default:doctor.user.username|slice:":1" }}</span>
+        </div>
+        <div>
+            <h2 class="mb-1">Book Appointment for {{ doctor }} at {{ clinic.name }}</h2>
+            {% if doctor.get_specialties %}
+                <div class="text-muted small">{{ doctor.get_specialties }}</div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if messages %}
+    <div class="mb-3">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if timesheets %}
+        <div class="row g-3">
+            {% for ts in timesheets %}
+            <div class="col-12 col-sm-6 col-lg-4">
+                <div class="card h-100 p-3">
+                    <h5 class="fw-semibold d-flex justify-content-between align-items-center mb-3">
+                        <span>{{ clinic.name }}</span>
+                        <span class="timesheet-date">{{ ts.end|date:"Y/m/d" }}</span>
+                    </h5>
+                    {% if ts.clinic.address or ts.clinic.description %}
+                    <div class="text-muted small mb-3">
+                        {{ ts.clinic.address|default:ts.clinic.description|truncatechars:90 }}
+                    </div>
+                    {% endif %}
+
+                    <form method="post" action="" class="timesheet-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="timesheet_id" value="{{ ts.id }}">
+                        
+                        {% if ts.available_slots %}
+                        <div class="available-slots">
+                            <div class="fw-semibold mb-2 text-success">
+                                <i class="fas fa-clock me-1"></i>Available Times ({{ ts.available_slots|length }} slots)
+                            </div>
+                            <div class="d-flex flex-wrap gap-2">
+                                {% for slot in ts.available_slots %}
+                                    <button name="slot" value="{{ slot }}" type="submit" class="btn btn-sm btn-outline-primary time-slot-btn">
+                                        <i class="fas fa-check-circle me-1"></i>{{ slot }}
+                                    </button>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-1"></i>No available times for this date.
+                        </div>
+                        {% endif %}
+                        
+                        {% if ts.booked_slots %}
+                        <div class="booked-slots">
+                            <div class="fw-semibold mb-2 text-muted">
+                                <i class="fas fa-lock me-1"></i>Booked Times ({{ ts.booked_slots|length }} slots)
+                            </div>
+                            <div class="d-flex flex-wrap gap-2">
+                                {% for slot in ts.booked_slots %}
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" disabled>
+                                        <i class="fas fa-times-circle me-1"></i>{{ slot }} (Booked)
+                                    </button>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">No active times registered for this doctor.</div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add click animation to time slot buttons
+    const timeSlotBtns = document.querySelectorAll('.time-slot-btn');
+    
+    timeSlotBtns.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            // Add loading state
+            this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Processing...';
+            this.disabled = true;
+            
+            // Add visual feedback
+            this.classList.remove('btn-outline-primary');
+            this.classList.add('btn-primary');
+            
+            // Submit the form after a short delay for better UX
+            setTimeout(() => {
+                this.closest('form').submit();
+            }, 500);
+        });
+    });
+    
+    // Add hover effects to cards
+    const cards = document.querySelectorAll('.card');
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+    
+    // Prevent double submission
+    const forms = document.querySelectorAll('.timesheet-form');
+    forms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            const submitBtn = this.querySelector('button[type="submit"]:not([disabled])');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Processing...';
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
+
+

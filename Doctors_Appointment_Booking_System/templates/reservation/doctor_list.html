@@ -1,0 +1,49 @@
+{% extends "base_generic.html" %}
+{% load static %}
+
+{% block title %}Doctor List{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <h2 class="mb-1">Doctors</h2>
+      <div class="text-muted small">Select one to view available time slots</div>
+    </div>
+    <a class="btn btn-outline-secondary btn-sm" href="{% url 'reservation:timesheet-list' %}">Manage Times</a>
+  </div>
+
+  {% if doctors %}
+  <div class="row g-3">
+    {% for doc in doctors %}
+<div class="col-12 col-sm-6 col-lg-4">
+  <div class="card h-100 p-3">
+    <h5 class="fw-semibold d-flex justify-content-between align-items-center">
+      <span>{{ doc }}</span>
+    </h5>
+    {% if doc.get_specialties %}
+      <div class="text-muted small mb-2">{{ doc.get_specialties }}</div>
+    {% endif %}
+
+    {% comment %}
+    انتخاب اولین کلینیک موجود برای دکتر، برای لینک رزرو
+    {% endcomment %}
+    {% with first_timesheet=doc.time_sheets.first %}
+      {% if first_timesheet %}
+        <a href="{% url 'reservation:doctor-reserve' clinic_id=first_timesheet.clinic.id doctor_id=doc.id %}" class="btn btn-outline-primary w-100 mt-auto">View Times</a>
+      {% else %}
+        <span class="text-muted">No clinic available</span>
+      {% endif %}
+    {% endwith %}
+  </div>
+</div>
+{% endfor %}
+
+  </div>
+  {% else %}
+    <div class="alert alert-info">No doctors found.</div>
+  {% endif %}
+</div>
+{% endblock %}
+
+

@@ -2,27 +2,41 @@ from django.urls import path
 from .views import (
     TimeSheetListView, TimeSheetCreateView, TimeSheetUpdateView, TimeSheetDeleteView,
     VisitListView, VisitCreateView, VisitUpdateView, VisitDeleteView,
-    EmailMessageListView, EmailMessageCreateView, EmailMessageUpdateView, EmailMessageDeleteView
+    DoctorListForReservationView, ClinicListForReservationView, DoctorListByClinicView,
+    DoctorReservationView, PaymentSuccessView, PaymentStartView,
+    DoctorTimesheetsAPIView,
 )
 
 app_name = "reservation"
 
 urlpatterns = [
-    # TimeSheet
+    # لیست کلینیک‌ها و سپس دکترهای هر کلینیک
+    path("clinics/", ClinicListForReservationView.as_view(), name="clinic-list"),
+    path("clinics/<int:clinic_id>/doctors/", DoctorListByClinicView.as_view(), name="clinic-doctor-list"),
+    # لیست همه دکترها (اختیاری)
+    path("doctors/", DoctorListForReservationView.as_view(), name="doctor-list"),
+
+    # مدیریت تایم‌شیت‌ها (برای دکترها/ادمین)
     path("timesheets/", TimeSheetListView.as_view(), name="timesheet-list"),
     path("timesheets/add/", TimeSheetCreateView.as_view(), name="timesheet-add"),
     path("timesheets/<int:pk>/edit/", TimeSheetUpdateView.as_view(), name="timesheet-edit"),
     path("timesheets/<int:pk>/delete/", TimeSheetDeleteView.as_view(), name="timesheet-delete"),
 
-    # Visit
+    # لیست ویزیت‌ها (برای کاربر/دکتر)
     path("visits/", VisitListView.as_view(), name="visit-list"),
     path("visits/add/", VisitCreateView.as_view(), name="visit-add"),
     path("visits/<int:pk>/edit/", VisitUpdateView.as_view(), name="visit-edit"),
     path("visits/<int:pk>/delete/", VisitDeleteView.as_view(), name="visit-delete"),
 
-    # EmailMessage
-    path("emails/", EmailMessageListView.as_view(), name="emailmessage-list"),
-    path("emails/add/", EmailMessageCreateView.as_view(), name="emailmessage-add"),
-    path("emails/<int:pk>/edit/", EmailMessageUpdateView.as_view(), name="emailmessage-edit"),
-    path("emails/<int:pk>/delete/", EmailMessageDeleteView.as_view(), name="emailmessage-delete"),
+    # صفحه رزرو دکتر در کلینیک مشخص
+    path("reserve/clinic/<int:clinic_id>/doctor/<int:doctor_id>/", DoctorReservationView.as_view(), name="doctor-reserve"),
+    
+    # API برای دریافت تایم‌شیت‌های دکتر در فرمت JSON
+    path("api/clinic/<int:clinic_id>/doctor/<int:doctor_id>/timesheets/", DoctorTimesheetsAPIView.as_view(), name="doctor-timesheets-api"),
+
+    # پرداخت موفق (نمایش کد پیگیری)
+    path("reserve/payment/success/", PaymentSuccessView.as_view(), name="payment-success"),
+    # شروع پرداخت (شبیه‌ساز درگاه)
+    path("reserve/payment/start/<int:visit_id>/", PaymentStartView.as_view(), name="payment-start"),
+
 ]

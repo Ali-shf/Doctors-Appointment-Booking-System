@@ -12,7 +12,7 @@ class ClinicAdmin(admin.ModelAdmin):
     list_display = (
     "name","founded_date","address")
     search_fields = ("name" , "address")
-    fieldsets = ((None, {"fields": ("name", "founded_date", "address", "description")}),("Working hours (JSON)", {"fields": ("working_hours",)}))
+    fieldsets = (None, {"fields": ("name", "founded_date", "address", "description")}),
 
 
 

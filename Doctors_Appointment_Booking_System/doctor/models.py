@@ -26,7 +26,8 @@ class Clinic(models.Model):
         related_name="clinics",
     )
 
-
+    def __str__(self):
+        return self.name 
 class ClinicDoctor(models.Model):
     clinic = models.ForeignKey(Clinic, on_delete=models.CASCADE, related_name="clinic_doctors")
     doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, related_name="doctor_links")

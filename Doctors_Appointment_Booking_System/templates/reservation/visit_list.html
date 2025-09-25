@@ -1,0 +1,40 @@
+{% extends "base_generic.html" %}
+
+{% block title %}Visit List{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+  <h2 class="mb-3">My Visits</h2>
+  {% if visits %}
+  <div class="row g-3">
+    {% for v in visits %}
+    <div class="col-12 col-sm-6 col-lg-4">
+      <div class="card h-100 p-3">
+        <h5 class="fw-semibold d-flex justify-content-between align-items-center">
+          <span>{{ v.doctor }}</span>
+          <span class="badge 
+            {% if v.status == 'confirmed' %}bg-success
+            {% elif v.status == 'pending' %}bg-warning
+            {% elif v.status == 'cancelled' %}bg-danger
+            {% else %}bg-secondary{% endif %}">
+            {{ v.get_status_display }}
+          </span>
+        </h5>
+        <div class="text-muted small mb-2">{{ v.clinic.name }}</div>
+        <div class="text-muted small mb-2">{{ v.date|date:"Y/m/d" }} - {{ v.start_meet|date:"H:i" }} to {{ v.end_meet|date:"H:i" }}</div>
+        <div class="fw-semibold text-primary mb-3">${{ v.price }}</div>
+        <div class="d-flex gap-2">
+          <a class="btn btn-sm btn-outline-primary" href="{% url 'reservation:visit-edit' v.pk %}">Edit</a>
+          <a class="btn btn-sm btn-outline-danger" href="{% url 'reservation:visit-delete' v.pk %}">Delete</a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="alert alert-info">No items found.</div>
+  {% endif %}
+</div>
+{% endblock %}
+
+

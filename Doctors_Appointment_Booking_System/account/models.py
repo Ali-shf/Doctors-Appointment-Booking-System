@@ -83,7 +83,7 @@ class Doctor(models.Model):
         return f"Dr. {n}"
 
     def get_specialties(self):
-        return ", ".join(specialty for specialty in self.specialties.all())
+        return ", ".join(str(specialty) for specialty in self.specialties.all())
 
 class Patient(models.Model):
     user = models.OneToOneField(
