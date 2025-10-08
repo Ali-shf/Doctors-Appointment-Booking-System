@@ -1,0 +1,28 @@
+{% extends "base_generic.html" %}
+
+{% block title %}Select Clinic{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+  <h2 class="mb-3">Clinics</h2>
+  {% if clinics %}
+  <div class="row g-3">
+    {% for c in clinics %}
+    <div class="col-12 col-sm-6 col-lg-4">
+      <div class="card h-100 p-3">
+        <h5 class="fw-semibold d-flex justify-content-between align-items-center">
+          <span>{{ c.name }}</span>
+        </h5>
+        <div class="text-muted small mb-2">{{ c.address|default:"—" }}</div>
+        <a href="{% url 'reservation:clinic-doctor-list' clinic_id=c.id %}" class="btn btn-outline-primary w-100 mt-auto">View Doctors</a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="alert alert-info">No clinics found.</div>
+  {% endif %}
+</div>
+{% endblock %}
+
+

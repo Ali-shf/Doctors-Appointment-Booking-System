@@ -1,0 +1,467 @@
+<!-- templates/auth/otp_login.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Email OTP Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Django CSRF token exposed via template tag and meta for fetch -->
+  <meta name="csrf-token" content="{{ csrf_token }}">
+
+  <style>
+    /* ----- CSS Reset (minimal) ----- */
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      color: #0f172a; /* slate-900 */
+      background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%); /* light gradient */
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+    }
+
+    /* ----- Card Layout ----- */
+    .card {
+      width: min(480px, 92vw);
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(2,6,23,0.08);
+      overflow: hidden;
+      border: 1px solid #e2e8f0;
+      animation: pop 280ms ease-out;
+    }
+    @keyframes pop {
+      from { transform: translateY(8px); opacity: 0; }
+      to   { transform: translateY(0); opacity: 1; }
+    }
+
+    .card-header {
+      padding: 20px 22px;
+      background: #f8fafc;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .title { margin: 0; font-size: 20px; letter-spacing: 0.2px; }
+    .subtitle { margin: 6px 0 0; font-size: 14px; color: #475569; }
+
+    .card-body { padding: 22px; }
+
+    /* ----- Form Controls ----- */
+    .form-row { margin-bottom: 14px; }
+    label { display: block; font-size: 14px; margin-bottom: 6px; color: #334155; }
+
+    .input {
+      width: 100%;
+      padding: 12px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      background: #fff;
+    }
+    .input:focus {
+      border-color: #6366f1; /* indigo-500 */
+      box-shadow: 0 0 0 4px rgba(99,102,241,0.12);
+    }
+    .input.error {
+      border-color: #ef4444; /* red-500 */
+      box-shadow: 0 0 0 4px rgba(239,68,68,0.08);
+    }
+
+    .hint {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 6px;
+    }
+
+    /* ----- Buttons ----- */
+    .btn-row { display: flex; gap: 10px; margin-top: 6px; }
+    .btn {
+      appearance: none;
+      border: none;
+      border-radius: 10px;
+      padding: 11px 14px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.02s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+      box-shadow: 0 6px 16px rgba(2,6,23,0.06);
+    }
+    .btn:active { transform: translateY(1px); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; box-shadow: none; }
+
+    .btn-primary { background: #4f46e5; color: white; }
+    .btn-outline {
+      background: white;
+      color: #334155;
+      border: 1px solid #cbd5e1;
+    }
+
+    /* ----- Divider ----- */
+    .divider {
+      height: 1px; background: #e2e8f0; margin: 18px 0;
+    }
+
+    /* ----- Verify Box ----- */
+    #verify-box { display: none; }
+
+    /* ----- Output / Status ----- */
+    .status {
+      background: #0f172a; /* slate-900 */
+      color: #e2e8f0;
+      padding: 12px;
+      border-radius: 10px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 12px;
+      max-height: 180px;
+      overflow: auto;
+      white-space: pre-wrap;
+    }
+
+    /* ----- Toast (simple) ----- */
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      transform: translateX(-50%);
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 10px 14px;
+      border-radius: 10px;
+      box-shadow: 0 8px 22px rgba(2,6,23,0.18);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 180ms ease;
+      font-size: 14px;
+    }
+    .toast.show { opacity: 1; }
+
+    /* ----- Footer ----- */
+    .card-footer {
+      padding: 14px 22px;
+      background: #f8fafc;
+      border-top: 1px solid #e2e8f0;
+      font-size: 12px;
+      color: #64748b;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .cooldown { font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body>
+  <main class="card" role="main" aria-labelledby="page-title">
+    <header class="card-header">
+      <h1 id="page-title" class="title">Email OTP Login</h1>
+      <p class="subtitle">Enter your email address. We will send a one-time code to verify it.</p>
+    </header>
+
+    <section class="card-body">
+      <!-- Email input row -->
+      <div class="form-row">
+        <label for="email">Email</label>
+        <input
+          id="email"
+          class="input"
+          type="email"
+          inputmode="email"
+          autocomplete="email"
+          placeholder="you@example.com"
+          aria-describedby="email-hint"
+          required
+        />
+        <p id="email-hint" class="hint">Use a valid email you can access now.</p>
+      </div>
+
+      <!-- Send button row -->
+      <div class="btn-row">
+        <button id="send" class="btn btn-primary">
+          Send Code
+        </button>
+        <button id="clear" class="btn btn-outline" type="button">
+          Clear
+        </button>
+      </div>
+
+      <div class="divider" role="separator" aria-hidden="true"></div>
+
+      <!-- Verify section (hidden until code is sent) -->
+      <div id="verify-box" aria-live="polite" aria-atomic="true">
+        <div class="form-row">
+          <label for="code">Verification Code</label>
+          <input
+            id="code"
+            class="input"
+            type="text"
+            inputmode="numeric"
+            pattern="\\d*"
+            placeholder="6-digit code"
+            autocomplete="one-time-code"
+            aria-describedby="code-hint"
+          />
+          <p id="code-hint" class="hint">Enter the 6-digit code from your inbox. Codes expire quickly.</p>
+        </div>
+        <div class="btn-row">
+          <button id="verify" class="btn btn-primary">Verify & Continue</button>
+          <button id="resend" class="btn btn-outline" type="button" disabled>
+            Resend (<span id="cooldown" class="cooldown">60</span>s)
+          </button>
+        </div>
+      </div>
+
+      <!-- Screen-reader friendly live region for short status messages -->
+      <div aria-live="polite" aria-atomic="true" style="position:absolute; left:-9999px; top:auto; width:1px; height:1px; overflow:hidden;">
+        <span id="sr-status"></span>
+      </div>
+
+      <!-- Debug/status output -->
+      <div class="form-row" style="margin-top:16px;">
+        <label for="out">Status</label>
+        <pre id="out" class="status" tabindex="0" aria-label="Operation status output"></pre>
+      </div>
+    </section>
+
+    <footer class="card-footer">
+      <span>Secure one-time code via email</span>
+      <span>Need help? Contact support</span>
+    </footer>
+  </main>
+
+  <!-- Simple toast element -->
+  <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+  <script>
+    // ---------------------------
+    // Helper: show toast message
+    // ---------------------------
+    function toast(msg, ms = 2000) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), ms);
+    }
+
+    // -------------------------------------------------
+    // Helper: POST with FormData and CSRF header (Django)
+    // -------------------------------------------------
+    function post(url, data) {
+      const form = new FormData();
+      for (const k in data) form.append(k, data[k]);
+      const csrf = document.querySelector('meta[name="csrf-token"]')?.content || "{{ csrf_token }}";
+      return fetch(url, {
+        method: "POST",
+        body: form,
+        headers: { "X-CSRFToken": csrf }
+      }).then(async r => {
+        // Try to parse JSON; fall back to status info on failure
+        try {
+          const j = await r.json();
+          return j;
+        } catch {
+          return { ok: false, error: "Invalid server response" };
+        }
+      });
+    }
+
+    // ---------------------------
+    // DOM references
+    // ---------------------------
+    const emailInput   = document.getElementById('email');
+    const codeInput    = document.getElementById('code');
+    const sendBtn      = document.getElementById('send');
+    const clearBtn     = document.getElementById('clear');
+    const verifyBtn    = document.getElementById('verify');
+    const resendBtn    = document.getElementById('resend');
+    const verifyBox    = document.getElementById('verify-box');
+    const out          = document.getElementById('out');
+    const srStatus     = document.getElementById('sr-status');
+    const cooldownEl   = document.getElementById('cooldown');
+
+    // ---------------------------
+    // Configurable client cooldown (seconds)
+    // This should mirror server-side OTP_RESEND_COOLDOWN.
+    // ---------------------------
+    const RESEND_COOLDOWN = 60; // seconds
+    let cooldownTimer = null;
+    let cooldownLeft = RESEND_COOLDOWN;
+
+    // ---------------------------
+    // Email validation (simple)
+    // ---------------------------
+    function isValidEmail(v) {
+      // Basic RFC5322-lite validation; the input[type=email] also helps
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+    }
+
+    function setOutput(obj) {
+      out.textContent = typeof obj === "string" ? obj : JSON.stringify(obj, null, 2);
+      out.scrollTop = out.scrollHeight;
+    }
+
+    function setSR(msg) {
+      srStatus.textContent = msg;
+    }
+
+    function setLoading(btn, loading) {
+      if (loading) {
+        btn.dataset._label = btn.textContent;
+        btn.textContent = "Working…";
+        btn.disabled = true;
+      } else {
+        btn.textContent = btn.dataset._label || btn.textContent;
+        btn.disabled = false;
+      }
+    }
+
+    function startCooldown() {
+      // Prevent overlapping timers
+      if (cooldownTimer) clearInterval(cooldownTimer);
+      cooldownLeft = RESEND_COOLDOWN;
+      resendBtn.disabled = true;
+      cooldownEl.textContent = String(cooldownLeft);
+      cooldownTimer = setInterval(() => {
+        cooldownLeft -= 1;
+        if (cooldownLeft <= 0) {
+          clearInterval(cooldownTimer);
+          cooldownTimer = null;
+          cooldownEl.textContent = "0";
+          resendBtn.disabled = false;
+          resendBtn.textContent = "Resend";
+          toast("You can request a new code now.");
+          return;
+        }
+        cooldownEl.textContent = String(cooldownLeft);
+        resendBtn.textContent = `Resend (${cooldownLeft}s)`;
+      }, 1000);
+    }
+
+    // ---------------------------
+    // Event: Send code
+    // ---------------------------
+    sendBtn.onclick = async () => {
+      const email = emailInput.value.trim().toLowerCase();
+
+      // UI validation
+      emailInput.classList.remove('error');
+      if (!email || !isValidEmail(email)) {
+        emailInput.classList.add('error');
+        setOutput({ ok: false, error: "Please enter a valid email address." });
+        toast("Invalid email address");
+        setSR("Invalid email address");
+        return;
+      }
+
+      // Call server: expects 'email' key (make sure your Django view reads request.POST['email'])
+      setLoading(sendBtn, true);
+      const res = await post("{% url 'otp-send' %}", { email });
+      setLoading(sendBtn, false);
+
+      setOutput(res);
+      if (res.ok) {
+        toast("Code sent to your email.");
+        setSR("Verification code sent.");
+        verifyBox.style.display = 'block';
+        codeInput.focus();
+        // Start resend cooldown UI
+        startCooldown();
+      } else {
+        // If server returns cooldown, keep verify hidden
+        if (res.error === "cooldown") {
+          verifyBox.style.display = 'block'; // optional: show verify if the user already has a valid code
+          startCooldown();
+        }
+        toast(res.error || "Failed to send code");
+        setSR("Failed to send code");
+      }
+    };
+
+    // ---------------------------
+    // Event: Clear form
+    // ---------------------------
+    clearBtn.onclick = () => {
+      emailInput.value = "";
+      codeInput.value = "";
+      emailInput.classList.remove('error');
+      codeInput.classList.remove('error');
+      setOutput("Cleared.");
+      setSR("Form cleared");
+      verifyBox.style.display = 'none';
+      if (cooldownTimer) {
+        clearInterval(cooldownTimer);
+        cooldownTimer = null;
+      }
+      resendBtn.disabled = true;
+      cooldownEl.textContent = String(RESEND_COOLDOWN);
+    };
+
+    // ---------------------------
+    // Event: Verify code
+    // ---------------------------
+    verifyBtn.onclick = async () => {
+      const email = emailInput.value.trim().toLowerCase();
+      const code  = codeInput.value.trim();
+
+      // UI validation
+      codeInput.classList.remove('error');
+      if (!code || code.length < 4) {
+        codeInput.classList.add('error');
+        setOutput({ ok: false, error: "Please enter your verification code." });
+        toast("Please enter your code");
+        setSR("Please enter your code");
+        return;
+      }
+
+      setLoading(verifyBtn, true);
+      const res = await post("{% url 'otp-verify' %}", { email, code });
+      setLoading(verifyBtn, false);
+
+      setOutput(res);
+      if (res.ok) {
+        toast("Verified. Redirecting…", 1200);
+        setSR("Verification successful");
+        // On success, navigate to dashboard or home. Server may also redirect directly.
+        window.location.href = res.redirect || "/"; 
+      } else {
+        toast(res.error || "Verification failed");
+        setSR("Verification failed");
+      }
+    };
+
+    // ---------------------------
+    // Event: Resend (after cooldown)
+    // ---------------------------
+    resendBtn.onclick = async () => {
+      const email = emailInput.value.trim().toLowerCase();
+      if (!email || !isValidEmail(email)) {
+        toast("Enter a valid email first.");
+        emailInput.focus();
+        return;
+      }
+      resendBtn.disabled = true;
+      const res = await post("{% url 'otp-send' %}", { email });
+      setOutput(res);
+      if (res.ok) {
+        toast("New code sent.");
+        setSR("New code sent");
+        startCooldown();
+      } else {
+        toast(res.error || "Could not resend");
+        setSR("Resend failed");
+        // If server says still in cooldown, reflect it
+        if (res.error === "cooldown") startCooldown();
+        else resendBtn.disabled = false;
+      }
+    };
+
+    // Optional: Enter key behavior for convenience
+    emailInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') sendBtn.click();
+    });
+    codeInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') verifyBtn.click();
+    });
+  </script>
+</body>
+</html>

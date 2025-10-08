@@ -7,13 +7,13 @@ This project demonstrates strong use of **Django ORM**, **authentication**, **RE
 
 ## 🚀 Features
 
-* 👨‍⚕️ **Doctor Management** – Add, edit, and view doctors’ profiles and schedules
-* 🧑‍💻 **Patient Registration & Login** – Secure user authentication using Django’s built-in auth system
-* 📅 **Appointment Booking System** – Book, cancel, and manage appointments
-* 💳 **Wallet System** – Deposit, deduct, and view transaction history
-* 📊 **Admin Dashboard** – Manage all entities from one place
-* 🐳 **Docker Support** – Fully containerized with PostgreSQL and Nginx
-* 🧪 **Unit Testing** – Comprehensive test coverage for models and business logic
+- 👨‍⚕️ **Doctor Management** – Add, edit, and view doctors’ profiles and schedules
+- 🧑‍💻 **Patient Registration & Login** – Secure user authentication using Django’s built-in auth system
+- 📅 **Appointment Booking System** – Book, cancel, and manage appointments
+- 💳 **Wallet System** – Deposit, deduct, and view transaction history
+- 📊 **Admin Dashboard** – Manage all entities from one place
+- 🐳 **Docker Support** – Fully containerized with PostgreSQL and Nginx
+- 🧪 **Unit Testing** – Comprehensive test coverage for models and business logic
 
 ---
 
@@ -92,7 +92,7 @@ FROM python:3.11-slim
 # set work directory
 WORKDIR /usr/src/app
 
-# Avoids Python writing pyc files 
+# Avoids Python writing pyc files
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
@@ -203,10 +203,9 @@ class WalletTestCase(TestCase):
 
 ## 📸 Screenshots
 
-> *(Add your screenshots here)*
+> _(Add your screenshots here)_
 > Example:
-> ![Login Page](staticfiles/images/login.png)
-> ![Dashboard](staticfiles/images/dashboard.png)
+> ![Login Page](staticfiles/images/login.png) > ![Dashboard](staticfiles/images/dashboard.png)
 
 ---
 
@@ -236,10 +235,7 @@ See the [LICENSE](LICENSE) file for more details.
 
 ---
 
-✨ *Built with Django, Docker, and ❤️ by Ali Shahrabi* ✨
-
-
-
+✨ _Built with Django, Docker, and ❤️ by Ali Shahrabi_ ✨
 
 ## 👥 Contributors
 
@@ -251,8 +247,7 @@ See the [LICENSE](LICENSE) file for more details.
 [![Soheylnik](https://github.com/Soheylnik.png?size=100)](https://github.com/Soheylnik)
 
 <!-- readme: contributors -end -->
-* ✨
+
+- ✨
 
 ---
-
-
