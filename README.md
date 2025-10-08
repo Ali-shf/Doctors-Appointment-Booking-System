@@ -129,7 +129,7 @@ class WalletTestCase(TestCase):
 ## 🧑‍💻 Author
 
 **Ali Shahrabi**
-📧 [your.email@example.com](mailto:your.email@example.com)
+📧 [your.email@example.com](ali.shahrabi.dev@gmail.com)
 🌐 [GitHub Profile](https://github.com/Ali-shf)
 
 ---
