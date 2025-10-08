@@ -324,13 +324,4 @@ See the [LICENSE](LICENSE) file for more details.
 
 ---
 
-## 👥 Contributors
 
-<!-- readme: contributors -start -->
-
-[![AmirmahdiGolahmar](https://github.com/AmirmahdiGolahmar.png?size=100)](https://github.com/AmirmahdiGolahmar)
-[![foadferdows](https://github.com/foadferdows.png?size=100)](https://github.com/foadferdows)
-[![devbysina](https://github.com/devbysina.png?size=100)](https://github.com/devbysina)
-[![Soheylnik](https://github.com/Soheylnik.png?size=100)](https://github.com/Soheylnik)
-
-<!-- readme: contributors -end -->
