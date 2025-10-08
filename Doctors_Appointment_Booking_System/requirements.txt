@@ -31,6 +31,7 @@ fonttools==4.59.0
 frozenlist==1.7.0
 fsspec==2025.3.0
 greenlet==3.2.4
+gunicorn==21.2.0
 h11==0.16.0
 hf-xet==1.1.7
 httpcore==1.0.9
@@ -64,6 +65,8 @@ progressbar2==4.5.0
 prompt_toolkit==3.0.51
 propcache==0.3.2
 psutil==7.0.0
+psycopg==3.2.10
+psycopg-binary==3.2.10
 ptyprocess==0.7.0
 pure_eval==0.2.3
 pyarrow==21.0.0
@@ -76,6 +79,7 @@ PyMySQL==1.1.1
 pyparsing==3.2.3
 python-dateutil==2.9.0.post0
 python-decouple==3.8
+python-dotenv==1.1.1
 python-utils==3.9.1
 pytz==2025.2
 PyYAML==6.0.2
@@ -96,5 +100,6 @@ tzdata==2025.2
 Unidecode==1.4.0
 urllib3==2.5.0
 wcwidth==0.2.13
+whitenoise==6.11.0
 xxhash==3.5.0
 yarl==1.20.1
