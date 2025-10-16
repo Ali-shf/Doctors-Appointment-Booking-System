@@ -218,3 +218,6 @@ __marimo__/
 *.iws
 *.iml
 *.ipr
+
+
+.DS_Store
